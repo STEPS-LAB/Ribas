@@ -5,7 +5,7 @@ import { MessageCircle, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-const syncTransition = { type: "tween" as const, duration: 0.4, ease: "easeInOut" };
+const syncTransition = { type: "tween" as const, duration: 0.4, ease: "easeInOut" as const };
 
 type AIAssistantWidgetProps = {
   locale: Locale;
