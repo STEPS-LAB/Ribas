@@ -1,0 +1,10 @@
+{
+  "name": "ribas",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix ribas-karpaty",
+    "build": "npm run build --prefix ribas-karpaty",
+    "start": "npm run start --prefix ribas-karpaty",
+    "lint": "npm run lint --prefix ribas-karpaty"
+  }
+}
