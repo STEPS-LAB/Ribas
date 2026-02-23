@@ -16,11 +16,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ribaskarpaty.com",
       },
-      {
-        protocol: "https",
-        hostname: "img.youtube.com",
-        pathname: "/vi/**",
-      },
     ],
   },
 };

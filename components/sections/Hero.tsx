@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 
 type HeroProps = {
@@ -12,12 +12,9 @@ type HeroProps = {
 const guestOptions = [1, 2, 3, 4, 5, 6];
 const startDate = "2026-03-14";
 const endDate = "2026-03-17";
-const heroVideoId = "ODR5b6kcyis";
-const heroVideoEmbedUrl = `https://www.youtube-nocookie.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroVideoId}&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&fs=0&showinfo=0`;
 
-const PREVIEW_TRANSITION_DURATION = 0.8;
+const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
-const VIDEO_READY_DELAY_MS = 1400;
 
 export function Hero({ locale }: HeroProps) {
   const [dates, setDates] = useState(`${startDate} - ${endDate}`);
@@ -25,11 +22,9 @@ export function Hero({ locale }: HeroProps) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
-  const [mountHeroVideo, setMountHeroVideo] = useState(false);
-  const [videoRevealed, setVideoRevealed] = useState(false);
-  const [posterTransitionDone, setPosterTransitionDone] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const copy = localized[locale];
 
   useEffect(() => {
@@ -43,35 +38,7 @@ export function Hero({ locale }: HeroProps) {
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
 
-  useEffect(() => {
-    if (reducedMotion) return;
-    const mountTimer = setTimeout(() => setMountHeroVideo(true), 100);
-    return () => clearTimeout(mountTimer);
-  }, [reducedMotion]);
-
-  const onIframeLoad = useCallback(() => {
-    if (reducedMotion) return;
-    revealTimeoutRef.current = setTimeout(
-      () => setVideoRevealed(true),
-      VIDEO_READY_DELAY_MS
-    );
-  }, [reducedMotion]);
-
-
-  useEffect(() => {
-    return () => {
-      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!videoRevealed) return;
-    const t = setTimeout(
-      () => setPosterTransitionDone(true),
-      (PREVIEW_TRANSITION_DURATION + 0.05) * 1000
-    );
-    return () => clearTimeout(t);
-  }, [videoRevealed]);
+  const onCanPlay = () => setVideoReady(true);
 
   const datePresets = useMemo(
     () => [
@@ -99,46 +66,40 @@ export function Hero({ locale }: HeroProps) {
         className="absolute inset-0"
         style={reducedMotion ? undefined : { y: parallaxY }}
       >
-        {mountHeroVideo && (
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: reducedMotion ? 1 : videoRevealed ? 1 : 0 }}
-            transition={{
-              duration: PREVIEW_TRANSITION_DURATION,
-              ease: PREVIEW_EASING,
-            }}
-          >
-            <iframe
-              className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-              src={heroVideoEmbedUrl}
-              title="Ribas Karpaty Hero Video"
-              allow="autoplay; encrypted-media; picture-in-picture"
-              loading="lazy"
-              onLoad={onIframeLoad}
-            />
-          </motion.div>
-        )}
-        {!posterTransitionDone && (
-          <motion.div
-            className="absolute inset-0 overflow-hidden"
-            initial={false}
-            animate={{
-              opacity: reducedMotion || !videoRevealed ? 1 : 0,
-              pointerEvents: videoRevealed ? "none" : "auto",
-            }}
-            transition={{
-              duration: PREVIEW_TRANSITION_DURATION,
-              ease: PREVIEW_EASING,
-            }}
-          >
-            <div
-              className="hero-poster-bg absolute inset-0 min-h-full min-w-full bg-cover bg-center bg-no-repeat"
-              role="img"
-              aria-label="Карпати — стоп-кадр з відео, гори без тексту"
-            />
-          </motion.div>
-        )}
+        {/* Poster: shown immediately for LCP; fades out when video is ready */}
+        <motion.div
+          className="absolute inset-0 z-[1] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url(/images/hero-poster.webp)",
+          }}
+          initial={false}
+          animate={{
+            opacity: reducedMotion || !videoReady ? 1 : 0,
+            pointerEvents: videoReady ? "none" : "auto",
+          }}
+          transition={{
+            duration: PREVIEW_TRANSITION_DURATION,
+            ease: PREVIEW_EASING,
+          }}
+          role="img"
+          aria-hidden
+        />
+        {/* Local video: no third-party requests, preload=none for fast LCP */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/images/hero-poster.webp"
+          onCanPlay={onCanPlay}
+          className="absolute inset-0 h-full w-full object-cover"
+          aria-hidden
+        >
+          <source src="/video/hero-video.webm" type="video/webm" />
+          <source src="/video/hero-video.mp4" type="video/mp4" />
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />

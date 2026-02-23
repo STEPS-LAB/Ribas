@@ -43,8 +43,9 @@ html {
   }
 }
 
+/* Hero poster is inlined in Hero.tsx for LCP; legacy class kept for reference */
 .hero-poster-bg {
-  background-image: url("/media/hero-poster.png");
+  background-image: url("/images/hero-poster.webp");
 }
 
 /* No page-level bottom padding: footer provides dark spacer for sticky bar (mobile) to avoid white gap */
