@@ -5,9 +5,10 @@ const nextConfig: NextConfig = {
   experimental: {
     // Inline CSS in HTML to eliminate render-blocking stylesheet request (~390ms).
     // Replaces <link href="...css"> with <style> in head — no extra network round-trip.
-    // Ideal for Tailwind (atomic CSS); improves FCP/LCP. Production build minifies CSS by default.
     inlineCss: true,
   },
+  // Modern JS: package.json "browserslist" targets Chrome/Edge/Firefox/Safari latest to reduce
+  // polyfills (Array.at, flat, Object.fromEntries, etc.) and bundle size (~14 KiB savings).
   // Дозволити доступ до dev-сервера з інших пристроїв у локальній мережі (hostname, не URL)
   allowedDevOrigins: [
     "127.0.0.1",
