@@ -1,12 +1,13 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { CalendarDays, ChevronDown, LoaderCircle, Users } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { CalendarDays, LoaderCircle, Minus, Plus, Users } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, memo, useCallback, useEffect, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
+  formatISOToDDMM,
   formatISOToDDMMYYYY,
   getDefaultCheckInCheckOut,
   todayISO,
@@ -16,7 +17,8 @@ type HeroProps = {
   locale: Locale;
 };
 
-const guestOptions = [1, 2, 3, 4, 5, 6];
+const GUESTS_MIN = 1;
+const GUESTS_MAX = 12;
 
 const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
@@ -85,60 +87,61 @@ const HeroBackground = memo(function HeroBackground({
 
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
+  const applyParallax = !reducedMotion && !isMobile;
 
   return (
-    <motion.div
-      className="absolute inset-0"
-      style={reducedMotion ? undefined : { y: parallaxY }}
-    >
-      {/* Poster overlay: fades out when video is ready; mobile/desktop split via CSS. */}
-      <motion.div
-        className="absolute inset-0 z-[1] overflow-hidden"
-        initial={false}
-        animate={{
-          opacity: reducedMotion || !videoReady ? 1 : 0,
-          pointerEvents: videoReady ? "none" : "auto",
-        }}
-        transition={{ duration: PREVIEW_TRANSITION_DURATION, ease: PREVIEW_EASING }}
-        role="img"
-        aria-hidden
-      >
-        {/* Mobile: Next/Image, hidden on desktop (lg+) to avoid loading on desktop. */}
-        {isMobile && (
-          <div className="block lg:hidden absolute inset-0">
-            <Image
-              src={HERO_POSTER_MOBILE}
-              alt=""
-              fill
-              priority
-              fetchPriority="high"
-              loading="eager"
-              className="object-cover object-center"
-              sizes="100vw"
-            />
-          </div>
-        )}
-        {/* Desktop: poster set via JS only, hidden on mobile. */}
-        {!isMobile && (
-          <div
-            ref={desktopPosterRef}
-            className="hidden lg:block h-full w-full bg-cover bg-center bg-no-repeat"
-          />
-        )}
-      </motion.div>
-      {/* Single video: no hidden classes, works on all viewports. */}
+    <div className="absolute inset-0">
+      {/* Video in non-transformed container so scroll does not trigger reload (iOS). */}
       <video
         ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         onCanPlay={onCanPlay}
         className="absolute inset-0 h-full w-full object-cover"
         aria-hidden
       />
-    </motion.div>
+      {/* Poster overlay: parallax only here so video layer is never transformed. */}
+      <motion.div
+        className="absolute inset-0 z-[1] overflow-hidden"
+        style={applyParallax ? { y: parallaxY } : undefined}
+      >
+        <motion.div
+          className="absolute inset-0"
+          initial={false}
+          animate={{
+            opacity: reducedMotion || !videoReady ? 1 : 0,
+            pointerEvents: videoReady ? "none" : "auto",
+          }}
+          transition={{ duration: PREVIEW_TRANSITION_DURATION, ease: PREVIEW_EASING }}
+          role="img"
+          aria-hidden
+        >
+          {isMobile && (
+            <div className="block lg:hidden absolute inset-0">
+              <Image
+                src={HERO_POSTER_MOBILE}
+                alt=""
+                fill
+                priority
+                fetchPriority="high"
+                loading="eager"
+                className="object-cover object-center"
+                sizes="100vw"
+              />
+            </div>
+          )}
+          {!isMobile && (
+            <div
+              ref={desktopPosterRef}
+              className="hidden lg:block h-full w-full bg-cover bg-center bg-no-repeat"
+            />
+          )}
+        </motion.div>
+      </motion.div>
+    </div>
   );
 });
 
@@ -147,21 +150,17 @@ function HeroInner({ locale }: HeroProps) {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showGuestsDropdown, setShowGuestsDropdown] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
-  const guestsDropdownRef = useRef<HTMLDivElement>(null);
   const copy = localized[locale];
   const closeCalendar = useCallback(() => setShowCalendar(false), []);
-  const closeGuestsDropdown = useCallback(() => setShowGuestsDropdown(false), []);
   const onCanPlay = useCallback(() => setVideoReady(true), []);
 
   useOnClickOutside(dateDropdownRef, closeCalendar);
-  useOnClickOutside(guestsDropdownRef, closeGuestsDropdown);
 
   useEffect(() => {
     const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
@@ -186,8 +185,9 @@ function HeroInner({ locale }: HeroProps) {
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
+  const formatDateRange = isMobile ? (a: string, b: string) => `${formatISOToDDMM(a)} — ${formatISOToDDMM(b)}` : (a: string, b: string) => `${formatISOToDDMMYYYY(a)} — ${formatISOToDDMMYYYY(b)}`;
   const datesDisplay = checkIn && checkOut
-    ? `${formatISOToDDMMYYYY(checkIn)} — ${formatISOToDDMMYYYY(checkOut)}`
+    ? formatDateRange(checkIn, checkOut)
     : copy.searchDates;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -244,19 +244,19 @@ function HeroInner({ locale }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.44, ease: "easeOut" }}
           onSubmit={onSubmit}
-          className="relative mt-12 grid gap-3 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
+          className="relative mt-12 grid grid-cols-2 gap-2 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:gap-4 sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
         >
-          <div ref={dateDropdownRef} className="relative">
+          <div ref={dateDropdownRef} className="relative min-w-0">
             <button
               onClick={() => setShowCalendar((value) => !value)}
-              className="flex w-full cursor-pointer items-center justify-between rounded-sm border border-black/15 bg-white px-3 py-3 text-left text-sm transition-all duration-300 ease hover:bg-black/[0.02]"
+              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-left transition-all duration-300 ease hover:bg-black/[0.02] min-w-0"
               type="button"
             >
-              <span className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-[#4A4A4A]" />
-                {copy.searchDates}
+              <span className="flex min-w-0 shrink-0 items-center gap-2">
+                <CalendarDays className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
+                <span className="truncate text-sm">{copy.searchDates}</span>
               </span>
-              <span className="text-xs text-[#4A4A4A] tracking-[0.02em]">{datesDisplay}</span>
+              <span className="shrink-0 truncate text-xs text-[#4A4A4A] tracking-[0.02em] max-w-[90px] sm:max-w-none">{datesDisplay}</span>
             </button>
 
             <motion.div
@@ -301,71 +301,47 @@ function HeroInner({ locale }: HeroProps) {
             </motion.div>
           </div>
 
-          <div ref={guestsDropdownRef} className="relative min-w-0">
-            <button
-              type="button"
-              onClick={() => setShowGuestsDropdown((v) => !v)}
-              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-left text-sm transition-all duration-300 ease hover:bg-black/[0.02]"
-              aria-label={copy.searchGuests}
-              aria-expanded={showGuestsDropdown}
-              aria-haspopup="listbox"
-            >
-              <span className="flex items-center gap-2">
-                <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
-                {copy.searchGuests}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-[#1A1A1B] tracking-[0.02em]">
+          <div className="flex min-w-0 items-center rounded-sm border border-black/15 bg-white transition-all duration-300 ease hover:bg-black/[0.02]">
+            <span className="flex shrink-0 items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A]">
+              <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
+              <span className="hidden truncate sm:inline">{copy.searchGuests}</span>
+            </span>
+            <div className="flex flex-1 items-center justify-center gap-1 py-2 pr-2 sm:gap-2 sm:py-3 sm:pr-3" aria-label={copy.searchGuests}>
+              <motion.button
+                type="button"
+                onClick={() => setGuests((n) => Math.max(GUESTS_MIN, n - 1))}
+                disabled={guests <= GUESTS_MIN}
+                whileTap={{ scale: 0.92 }}
+                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] sm:h-9 sm:w-9"
+                aria-label="-"
+              >
+                <Minus className="h-4 w-4" />
+              </motion.button>
+              <span className="min-w-[1.5rem] text-center text-sm font-medium text-[#1A1A1B] tracking-[0.02em] sm:min-w-[2rem] sm:text-base">
                 {guests}
-                <motion.span
-                  animate={{ rotate: showGuestsDropdown ? 180 : 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                  className="inline-block shrink-0"
-                >
-                  <ChevronDown className="h-4 w-4 text-[#4A4A4A]" aria-hidden />
-                </motion.span>
               </span>
-            </button>
-
-            <AnimatePresence>
-              {showGuestsDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="absolute left-0 right-0 z-20 mt-2 min-w-40 overflow-hidden rounded-sm bg-[#FFFFFF] py-1 shadow-xl"
-                  role="listbox"
-                  aria-label={copy.searchGuests}
-                >
-                  {guestOptions.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="option"
-                      aria-selected={guests === value}
-                      onClick={() => {
-                        setGuests(value);
-                        setShowGuestsDropdown(false);
-                      }}
-                      className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-sm text-[#1A1A1B] tracking-[0.02em] transition-colors duration-200 hover:text-[#C5A059] focus:outline-none focus-visible:bg-black/[0.03] focus-visible:text-[#C5A059]"
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+              <motion.button
+                type="button"
+                onClick={() => setGuests((n) => Math.min(GUESTS_MAX, n + 1))}
+                disabled={guests >= GUESTS_MAX}
+                whileTap={{ scale: 0.92 }}
+                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] sm:h-9 sm:w-9"
+                aria-label="+"
+              >
+                <Plus className="h-4 w-4" />
+              </motion.button>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="rounded-sm bg-[#C5A059] px-6 py-3 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
+            className="col-span-2 rounded-sm bg-[#C5A059] px-6 py-3 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 sm:col-span-1"
           >
             {copy.searchButton}
           </button>
 
           {(isSearching || searchDone) && (
-            <div className="sm:col-span-3">
+            <div className="col-span-2 sm:col-span-3">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
