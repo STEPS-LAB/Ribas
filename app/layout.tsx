@@ -38,13 +38,13 @@ export default function RootLayout({
           rel="preload"
           href="/images/hero-poster%20desktop.webp"
           as="image"
-          media="(min-width: 769px)"
+          media="(min-width: 1024px)"
         />
         <link
           rel="preload"
           href="/images/hero-poster%20mobile.webp"
           as="image"
-          media="(max-width: 768px)"
+          media="(max-width: 1023px)"
         />
       </head>
       <body className={`${inter.variable} antialiased`}>

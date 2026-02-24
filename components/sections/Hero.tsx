@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
+import Image from "next/image";
 import { FormEvent, memo, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
@@ -20,24 +21,26 @@ const guestOptions = [1, 2, 3, 4, 5, 6];
 const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
-const MOBILE_BREAKPOINT = 768;
+/** lg breakpoint: desktop from 1024px, mobile below. */
+const DESKTOP_BREAKPOINT = 1024;
 const HERO_VIDEO_DESKTOP = "/videos/hero.webm";
 const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
-/** Stable poster URL for the video element so it stays cached and never triggers re-render/black frame. */
-const HERO_VIDEO_POSTER = HERO_POSTER_DESKTOP;
+/** Placeholder until device is known — avoids loading both mobile and desktop assets. */
+const HeroPlaceholder = memo(function HeroPlaceholder() {
+  return <div className="absolute inset-0 bg-[#1a1a1b]" aria-hidden />;
+});
 
-const HeroBackground = memo(function HeroBackground({
+/** Mobile-only: poster via Next/Image (priority), video without poster. Not in DOM on desktop. */
+const HeroMobileBackground = memo(function HeroMobileBackground({
   reducedMotion,
   videoReady,
-  posterSrc,
   onCanPlay,
 }: {
   reducedMotion: boolean;
   videoReady: boolean;
-  posterSrc: string;
   onCanPlay: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -45,21 +48,83 @@ const HeroBackground = memo(function HeroBackground({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    video.poster = "";
+    video.src = HERO_VIDEO_MOBILE;
+    video.load();
+    video.play().catch(() => {});
+  }, []);
+
+  const { scrollY } = useScroll();
+  const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
+
+  return (
+    <motion.div
+      className="absolute inset-0 block lg:hidden"
+      style={reducedMotion ? undefined : { y: parallaxY }}
+    >
+      <motion.div
+        className="absolute inset-0 z-[1] overflow-hidden"
+        initial={false}
+        animate={{
+          opacity: reducedMotion || !videoReady ? 1 : 0,
+          pointerEvents: videoReady ? "none" : "auto",
+        }}
+        transition={{ duration: PREVIEW_TRANSITION_DURATION, ease: PREVIEW_EASING }}
+        role="img"
+        aria-hidden
+      >
+        <Image
+          src={HERO_POSTER_MOBILE}
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+      </motion.div>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster=""
+        onCanPlay={onCanPlay}
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden
+      />
+    </motion.div>
+  );
+});
+
+/** Desktop-only: poster set via JS (no static HTML), video with desktop source. Not in DOM on mobile. */
+const HeroDesktopBackground = memo(function HeroDesktopBackground({
+  reducedMotion,
+  videoReady,
+  onCanPlay,
+}: {
+  reducedMotion: boolean;
+  videoReady: boolean;
+  onCanPlay: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const desktopPosterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
     let fallbackTried = false;
-    const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
-
-    const setSource = () => {
+    const applyDesktop = () => {
       fallbackTried = false;
-      const mobile = isMobile();
-      const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
-      video.poster = HERO_VIDEO_POSTER;
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-      video.src = src;
+      video.poster = HERO_POSTER_DESKTOP;
+      video.src = HERO_VIDEO_DESKTOP;
       video.load();
       video.play().catch(() => {});
+      const el = desktopPosterRef.current;
+      if (el) el.style.backgroundImage = `url(${HERO_POSTER_DESKTOP})`;
     };
 
     const onError = () => {
@@ -71,13 +136,8 @@ const HeroBackground = memo(function HeroBackground({
     };
 
     video.addEventListener("error", onError);
-    setSource();
-    const onResize = () => setSource();
-    window.addEventListener("resize", onResize);
-    return () => {
-      video.removeEventListener("error", onError);
-      window.removeEventListener("resize", onResize);
-    };
+    applyDesktop();
+    return () => video.removeEventListener("error", onError);
   }, []);
 
   const { scrollY } = useScroll();
@@ -85,7 +145,7 @@ const HeroBackground = memo(function HeroBackground({
 
   return (
     <motion.div
-      className="absolute inset-0"
+      className="absolute inset-0 hidden lg:block"
       style={reducedMotion ? undefined : { y: parallaxY }}
     >
       <motion.div
@@ -95,18 +155,13 @@ const HeroBackground = memo(function HeroBackground({
           opacity: reducedMotion || !videoReady ? 1 : 0,
           pointerEvents: videoReady ? "none" : "auto",
         }}
-        transition={{
-          duration: PREVIEW_TRANSITION_DURATION,
-          ease: PREVIEW_EASING,
-        }}
+        transition={{ duration: PREVIEW_TRANSITION_DURATION, ease: PREVIEW_EASING }}
         role="img"
         aria-hidden
       >
-        <img
-          src={posterSrc}
-          alt=""
-          className="h-full w-full object-cover object-center"
-          fetchPriority="high"
+        <div
+          ref={desktopPosterRef}
+          className="h-full w-full bg-cover bg-center bg-no-repeat"
         />
       </motion.div>
       <video
@@ -115,8 +170,7 @@ const HeroBackground = memo(function HeroBackground({
         muted
         loop
         playsInline
-        preload="none"
-        poster={HERO_VIDEO_POSTER}
+        preload="auto"
         onCanPlay={onCanPlay}
         className="absolute inset-0 h-full w-full object-cover"
         aria-hidden
@@ -134,7 +188,8 @@ function HeroInner({ locale }: HeroProps) {
   const [searchDone, setSearchDone] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+  /** null = not yet known (avoids loading both mobile + desktop assets on first paint). */
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
   const copy = localized[locale];
@@ -150,22 +205,18 @@ function HeroInner({ locale }: HeroProps) {
   }, []);
 
   useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < DESKTOP_BREAKPOINT);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mq.matches);
     const handler = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    const posterMq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
-    const updatePoster = () => {
-      const mobile = posterMq.matches;
-      setPosterSrc(mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP);
-    };
-    updatePoster();
-    posterMq.addEventListener("change", updatePoster);
-    return () => posterMq.removeEventListener("change", updatePoster);
   }, []);
 
   const minCheckIn = todayISO();
@@ -187,12 +238,21 @@ function HeroInner({ locale }: HeroProps) {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      <HeroBackground
-        reducedMotion={reducedMotion}
-        videoReady={videoReady}
-        posterSrc={posterSrc}
-        onCanPlay={onCanPlay}
-      />
+      {isMobile === null && <HeroPlaceholder />}
+      {isMobile === true && (
+        <HeroMobileBackground
+          reducedMotion={reducedMotion}
+          videoReady={videoReady}
+          onCanPlay={onCanPlay}
+        />
+      )}
+      {isMobile === false && (
+        <HeroDesktopBackground
+          reducedMotion={reducedMotion}
+          videoReady={videoReady}
+          onCanPlay={onCanPlay}
+        />
+      )}
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
 

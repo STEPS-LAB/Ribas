@@ -41,6 +41,7 @@ export function About({ locale }: AboutProps) {
               alt="Ribas Karpaty panoramic terrace"
               className="h-full w-full object-cover"
               loading="lazy"
+              decoding="async"
               sizes="(max-width: 768px) 100vw, 40vw"
             />
           </picture>
