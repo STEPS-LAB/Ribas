@@ -1,6 +1,7 @@
 "use client";
 
 import { Locale, localized, BOOKING_MODAL_MAX_GUESTS } from "@/lib/content";
+import { getDefaultCheckInCheckOut, todayISO } from "@/lib/dates";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Minus, Plus, Users, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, FormEvent } from "react";
@@ -10,14 +11,6 @@ type BookingModalProps = {
   onClose: () => void;
   locale: Locale;
 };
-
-function toISO(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function todayISO() {
-  return toISO(new Date());
-}
 
 export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
   const copy = localized[locale];
@@ -33,6 +26,13 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
+
+  useEffect(() => {
+    if (!isOpen || checkIn) return;
+    const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
+    setCheckIn(defIn);
+    setCheckOut(defOut);
+  }, [isOpen, checkIn]);
 
   const lockScroll = useCallback(() => {
     document.body.style.overflow = "hidden";

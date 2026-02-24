@@ -77,8 +77,17 @@ export function Footer({ locale }: FooterProps) {
           </div>
         </div>
 
-        <p className="mt-12 border-t border-white/10 pt-6 text-center text-xs tracking-[0.16em] text-white/60">
-          {copy.footerCredits}
+        <p className="mt-12 border-t border-white/10 pt-6 text-center text-sm font-light tracking-[0.16em] text-white/60">
+          {copy.footerCredits.split("STEPS LAB")[0]}
+          <a
+            href="https://stepslab.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#C5A059] transition-colors duration-300 hover:opacity-80"
+          >
+            STEPS LAB
+          </a>
+          {copy.footerCredits.split("STEPS LAB")[1]}
         </p>
       </div>
     </footer>

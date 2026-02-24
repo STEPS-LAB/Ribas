@@ -4,24 +4,17 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
+import {
+  formatISOToDDMMYYYY,
+  getDefaultCheckInCheckOut,
+  todayISO,
+} from "@/lib/dates";
 
 type HeroProps = {
   locale: Locale;
 };
 
 const guestOptions = [1, 2, 3, 4, 5, 6];
-const defaultCheckIn = "2026-03-14";
-const defaultCheckOut = "2026-03-17";
-
-function formatISOToDDMMYYYY(iso: string): string {
-  if (!iso) return "";
-  const [y, m, d] = iso.split("-");
-  return `${d}.${m}.${y}`;
-}
-
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
@@ -33,8 +26,8 @@ const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
 export function Hero({ locale }: HeroProps) {
-  const [checkIn, setCheckIn] = useState(defaultCheckIn);
-  const [checkOut, setCheckOut] = useState(defaultCheckOut);
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -44,6 +37,12 @@ export function Hero({ locale }: HeroProps) {
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
   const videoRef = useRef<HTMLVideoElement>(null);
   const copy = localized[locale];
+
+  useEffect(() => {
+    const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
+    setCheckIn((prev) => prev || defIn);
+    setCheckOut((prev) => prev || defOut);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
