@@ -90,7 +90,7 @@ const HeroBackground = memo(function HeroBackground({
   const applyParallax = !reducedMotion && !isMobile;
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 z-0">
       {/* Video in non-transformed container so scroll does not trigger reload (iOS). */}
       <video
         ref={videoRef}
@@ -100,7 +100,7 @@ const HeroBackground = memo(function HeroBackground({
         playsInline
         preload="auto"
         onCanPlay={onCanPlay}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         aria-hidden
       />
       {/* Poster overlay: parallax only here so video layer is never transformed. */}
@@ -210,10 +210,10 @@ function HeroInner({ locale }: HeroProps) {
         videoReady={videoReady}
         onCanPlay={onCanPlay}
       />
-      <div className="absolute inset-0 bg-black/45" />
-      <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-black/45" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" aria-hidden />
 
-      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
+      <div className="relative z-40 mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -245,12 +245,12 @@ function HeroInner({ locale }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.44, ease: "easeOut" }}
           onSubmit={onSubmit}
-          className="relative mt-12 flex flex-col gap-2 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:flex-row sm:items-stretch sm:gap-3"
+          className="relative z-40 mt-12 flex flex-col gap-2 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:flex-row sm:items-stretch sm:gap-3 [pointer-events:auto]"
         >
-          <div ref={dateDropdownRef} className="relative min-w-0 sm:flex-[1.35]">
+          <div ref={dateDropdownRef} className="relative z-0 min-w-0 sm:flex-[1.35] [pointer-events:auto]">
             <button
               onClick={() => setShowCalendar((value) => !value)}
-              className="flex h-[60px] w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-4 text-left transition-all duration-300 ease hover:bg-neutral-50 min-w-0"
+              className="flex h-[60px] w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-4 text-left transition-all duration-300 ease hover:bg-neutral-50 min-w-0 [pointer-events:auto]"
               type="button"
             >
               <span className="flex min-w-0 shrink-0 items-center gap-2">
@@ -302,11 +302,11 @@ function HeroInner({ locale }: HeroProps) {
             </motion.div>
           </div>
 
-          <div className="flex h-[60px] min-w-0 cursor-pointer items-center rounded-sm border border-black/15 bg-white transition-all duration-300 ease hover:bg-neutral-50 sm:flex-1">
+          <div className="flex h-[60px] min-w-0 cursor-pointer items-center rounded-sm border border-black/15 bg-white transition-all duration-300 ease hover:bg-neutral-50 sm:flex-1 [pointer-events:auto]">
             <button
               type="button"
               onClick={() => guestsStepperRef.current?.focus()}
-              className="flex shrink-0 items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A] focus:outline-none"
+              className="flex shrink-0 cursor-pointer items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A] focus:outline-none [pointer-events:auto]"
             >
               <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
               <span className="hidden truncate sm:inline">{copy.searchGuests}</span>
@@ -322,7 +322,7 @@ function HeroInner({ locale }: HeroProps) {
                 onClick={() => setGuests((n) => Math.max(GUESTS_MIN, n - 1))}
                 disabled={guests <= GUESTS_MIN}
                 whileTap={{ scale: 0.92 }}
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059]"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] [pointer-events:auto]"
                 aria-label="-"
               >
                 <Minus className="h-4 w-4" />
@@ -335,7 +335,7 @@ function HeroInner({ locale }: HeroProps) {
                 onClick={() => setGuests((n) => Math.min(GUESTS_MAX, n + 1))}
                 disabled={guests >= GUESTS_MAX}
                 whileTap={{ scale: 0.92 }}
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059]"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] [pointer-events:auto]"
                 aria-label="+"
               >
                 <Plus className="h-4 w-4" />
@@ -345,7 +345,7 @@ function HeroInner({ locale }: HeroProps) {
 
           <button
             type="submit"
-            className="mt-2 flex h-[60px] w-full items-center justify-center rounded-sm bg-[#C5A059] px-6 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 sm:mt-0 sm:w-auto"
+            className="mt-2 flex h-[60px] w-full cursor-pointer items-center justify-center rounded-sm bg-[#C5A059] px-6 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 sm:mt-0 sm:w-auto [pointer-events:auto]"
           >
             {copy.searchButton}
           </button>
