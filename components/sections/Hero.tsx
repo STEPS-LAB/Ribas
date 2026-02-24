@@ -19,6 +19,8 @@ const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 const MOBILE_BREAKPOINT = 768;
 const HERO_VIDEO_DESKTOP = "/videos/hero.webm";
 const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
+const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
+const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
 export function Hero({ locale }: HeroProps) {
   const [dates, setDates] = useState(`${startDate} - ${endDate}`);
@@ -28,6 +30,7 @@ export function Hero({ locale }: HeroProps) {
   const [searchDone, setSearchDone] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
   const videoRef = useRef<HTMLVideoElement>(null);
   const copy = localized[locale];
 
@@ -37,6 +40,17 @@ export function Hero({ locale }: HeroProps) {
     const handler = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const posterMq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const updatePoster = () => {
+      const mobile = posterMq.matches;
+      setPosterSrc(mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP);
+    };
+    updatePoster();
+    posterMq.addEventListener("change", updatePoster);
+    return () => posterMq.removeEventListener("change", updatePoster);
   }, []);
 
   useEffect(() => {
@@ -50,6 +64,7 @@ export function Hero({ locale }: HeroProps) {
       fallbackTried = false;
       const mobile = isMobile();
       const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
+      video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -122,18 +137,12 @@ export function Hero({ locale }: HeroProps) {
           role="img"
           aria-hidden
         >
-          <picture className="absolute inset-0 block h-full w-full">
-            <source
-              media="(max-width: 768px)"
-              srcSet="/images/hero-poster%20mobile.webp"
-            />
-            <img
-              src="/images/hero-poster%20desktop.webp"
-              alt=""
-              className="h-full w-full object-cover object-center"
-              fetchPriority="high"
-            />
-          </picture>
+          <img
+            src={posterSrc}
+            alt=""
+            className="h-full w-full object-cover object-center"
+            fetchPriority="high"
+          />
         </motion.div>
         {/* Local video from /videos; src set in useEffect (mobile vs desktop), then play() */}
         <video
@@ -143,7 +152,7 @@ export function Hero({ locale }: HeroProps) {
           loop
           playsInline
           preload="none"
-          poster="/images/hero-poster%20desktop.webp"
+          poster={posterSrc}
           onCanPlay={onCanPlay}
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden
