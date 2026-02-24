@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, memo, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
@@ -26,48 +26,21 @@ const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
-export function Hero({ locale }: HeroProps) {
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(2);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchDone, setSearchDone] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+/** Stable poster URL for the video element so it stays cached and never triggers re-render/black frame. */
+const HERO_VIDEO_POSTER = HERO_POSTER_DESKTOP;
+
+const HeroBackground = memo(function HeroBackground({
+  reducedMotion,
+  videoReady,
+  posterSrc,
+  onCanPlay,
+}: {
+  reducedMotion: boolean;
+  videoReady: boolean;
+  posterSrc: string;
+  onCanPlay: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const dateDropdownRef = useRef<HTMLDivElement>(null);
-  const guestsSelectId = useId();
-  const copy = localized[locale];
-  const closeCalendar = useCallback(() => setShowCalendar(false), []);
-
-  useOnClickOutside(dateDropdownRef, closeCalendar);
-
-  useEffect(() => {
-    const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
-    setCheckIn((prev) => prev || defIn);
-    setCheckOut((prev) => prev || defOut);
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = () => setReducedMotion(mq.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    const posterMq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
-    const updatePoster = () => {
-      const mobile = posterMq.matches;
-      setPosterSrc(mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP);
-    };
-    updatePoster();
-    posterMq.addEventListener("change", updatePoster);
-    return () => posterMq.removeEventListener("change", updatePoster);
-  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -80,7 +53,7 @@ export function Hero({ locale }: HeroProps) {
       fallbackTried = false;
       const mobile = isMobile();
       const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
-      video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
+      video.poster = HERO_VIDEO_POSTER;
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -110,7 +83,90 @@ export function Hero({ locale }: HeroProps) {
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
 
-  const onCanPlay = () => setVideoReady(true);
+  return (
+    <motion.div
+      className="absolute inset-0"
+      style={reducedMotion ? undefined : { y: parallaxY }}
+    >
+      <motion.div
+        className="absolute inset-0 z-[1] overflow-hidden"
+        initial={false}
+        animate={{
+          opacity: reducedMotion || !videoReady ? 1 : 0,
+          pointerEvents: videoReady ? "none" : "auto",
+        }}
+        transition={{
+          duration: PREVIEW_TRANSITION_DURATION,
+          ease: PREVIEW_EASING,
+        }}
+        role="img"
+        aria-hidden
+      >
+        <img
+          src={posterSrc}
+          alt=""
+          className="h-full w-full object-cover object-center"
+          fetchPriority="high"
+        />
+      </motion.div>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster={HERO_VIDEO_POSTER}
+        onCanPlay={onCanPlay}
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden
+      />
+    </motion.div>
+  );
+});
+
+function HeroInner({ locale }: HeroProps) {
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [guests, setGuests] = useState(2);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchDone, setSearchDone] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+  const dateDropdownRef = useRef<HTMLDivElement>(null);
+  const guestsSelectId = useId();
+  const copy = localized[locale];
+  const closeCalendar = useCallback(() => setShowCalendar(false), []);
+  const onCanPlay = useCallback(() => setVideoReady(true), []);
+
+  useOnClickOutside(dateDropdownRef, closeCalendar);
+
+  useEffect(() => {
+    const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
+    setCheckIn((prev) => prev || defIn);
+    setCheckOut((prev) => prev || defOut);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler = () => setReducedMotion(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const posterMq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const updatePoster = () => {
+      const mobile = posterMq.matches;
+      setPosterSrc(mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP);
+    };
+    updatePoster();
+    posterMq.addEventListener("change", updatePoster);
+    return () => posterMq.removeEventListener("change", updatePoster);
+  }, []);
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
@@ -131,46 +187,12 @@ export function Hero({ locale }: HeroProps) {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      <motion.div
-        className="absolute inset-0"
-        style={reducedMotion ? undefined : { y: parallaxY }}
-      >
-        {/* Poster: shown immediately for LCP; fades out when video is ready. Responsive: mobile vs desktop. */}
-        <motion.div
-          className="absolute inset-0 z-[1] overflow-hidden"
-          initial={false}
-          animate={{
-            opacity: reducedMotion || !videoReady ? 1 : 0,
-            pointerEvents: videoReady ? "none" : "auto",
-          }}
-          transition={{
-            duration: PREVIEW_TRANSITION_DURATION,
-            ease: PREVIEW_EASING,
-          }}
-          role="img"
-          aria-hidden
-        >
-          <img
-            src={posterSrc}
-            alt=""
-            className="h-full w-full object-cover object-center"
-            fetchPriority="high"
-          />
-        </motion.div>
-        {/* Local video from /videos; src set in useEffect (mobile vs desktop), then play() */}
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster={posterSrc}
-          onCanPlay={onCanPlay}
-          className="absolute inset-0 h-full w-full object-cover"
-          aria-hidden
-        />
-      </motion.div>
+      <HeroBackground
+        reducedMotion={reducedMotion}
+        videoReady={videoReady}
+        posterSrc={posterSrc}
+        onCanPlay={onCanPlay}
+      />
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
 
@@ -312,3 +334,5 @@ export function Hero({ locale }: HeroProps) {
     </section>
   );
 }
+
+export const Hero = memo(HeroInner);
