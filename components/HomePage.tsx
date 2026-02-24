@@ -1,6 +1,7 @@
 "use client";
 
 import { useInView } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { Locale } from "@/lib/content";
 import { Header } from "@/components/sections/Header";
@@ -10,9 +11,21 @@ import { Rooms } from "@/components/sections/Rooms";
 import { Amenities } from "@/components/sections/Amenities";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { Footer } from "@/components/sections/Footer";
-import { AIAssistantWidget } from "@/components/features/AIAssistantWidget";
-import { BookingModal } from "@/components/features/BookingModal";
-import { MobileStickyBookingBar } from "@/components/features/MobileStickyBookingBar";
+
+const AIAssistantWidget = dynamic(
+  () => import("@/components/features/AIAssistantWidget").then((m) => ({ default: m.AIAssistantWidget })),
+  { ssr: true }
+);
+
+const BookingModal = dynamic(
+  () => import("@/components/features/BookingModal").then((m) => ({ default: m.BookingModal })),
+  { ssr: true }
+);
+
+const MobileStickyBookingBar = dynamic(
+  () => import("@/components/features/MobileStickyBookingBar").then((m) => ({ default: m.MobileStickyBookingBar })),
+  { ssr: true }
+);
 
 export function HomePage() {
   const [locale, setLocale] = useState<Locale>("ua");
