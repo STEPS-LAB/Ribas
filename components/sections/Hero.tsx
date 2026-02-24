@@ -224,12 +224,12 @@ export function Hero({ locale }: HeroProps) {
                   : { opacity: 0, y: 0, pointerEvents: "none" }
               }
               transition={{ duration: 0.2 }}
-              className="absolute z-20 mt-2 w-full min-w-[280px] rounded-sm border border-black/10 bg-white p-4 shadow-xl"
+              className="absolute left-0 right-0 z-20 mt-2 max-w-full overflow-hidden rounded-sm border border-black/10 bg-white p-4 shadow-xl md:left-auto md:right-auto md:min-w-[280px]"
             >
               <p className="mb-3 text-xs uppercase tracking-[0.16em] text-[#4A4A4A]">
                 {copy.calendarLabel}
               </p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-x-4 md:gap-y-3">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-sm text-[#4A4A4A]">{copy.dateCheckInLabel}</span>
                   <input
@@ -241,7 +241,7 @@ export function Hero({ locale }: HeroProps) {
                       setCheckIn(v);
                       if (checkOut && v >= checkOut) setCheckOut("");
                     }}
-                    className="rounded border border-black/15 bg-white px-2.5 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -251,7 +251,7 @@ export function Hero({ locale }: HeroProps) {
                     min={minCheckOut}
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    className="rounded border border-black/15 bg-white px-2.5 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
               </div>

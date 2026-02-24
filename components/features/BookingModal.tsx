@@ -142,7 +142,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
 
             <form onSubmit={handleSubmit} className="p-4 sm:p-5">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-3">
                   <label htmlFor={checkInId} className="flex flex-col gap-1.5 text-sm">
                     <span className="flex items-center gap-2 text-[#4A4A4A]">
                       <CalendarDays className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                           setCheckIn(e.target.value);
                           if (checkOut && e.target.value >= checkOut) setCheckOut("");
                         }}
-                        className={`w-full rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
                       {!checkIn && (
                         <span
@@ -184,7 +184,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                         min={minCheckOut}
                         value={checkOut}
                         onChange={(e) => setCheckOut(e.target.value)}
-                        className={`w-full rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
                       {!checkOut && (
                         <span
