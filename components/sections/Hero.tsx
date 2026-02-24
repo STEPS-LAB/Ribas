@@ -30,14 +30,9 @@ const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
-/** Static video HTML: browser-owned, no React lifecycle. Two sources (desktop/mobile) shown via CSS. */
-const HERO_VIDEO_HTML =
-  `<video class="absolute inset-0 h-full w-full object-cover pointer-events-none hidden lg:block" autoplay muted loop playsinline webkit-playsinline="true" preload="auto" style="width:100%;height:100%;object-fit:cover;pointer-events:none" poster="${HERO_POSTER_DESKTOP}" aria-hidden="true"><source src="${HERO_VIDEO_DESKTOP}" type="video/webm"></video>` +
-  `<video class="absolute inset-0 h-full w-full object-cover pointer-events-none block lg:hidden" autoplay muted loop playsinline webkit-playsinline="true" preload="auto" style="width:100%;height:100%;object-fit:cover;pointer-events:none" aria-hidden="true"><source src="${HERO_VIDEO_MOBILE}" type="video/webm"></video>`;
-
 /**
- * Hero video + poster. Video is injected via dangerouslySetInnerHTML so React never touches it
- * after mount, avoiding iOS restart issues. Poster overlay fades out when video can play.
+ * Hero video + poster. Memoized so it only re-renders when props change; video sources are
+ * stable (desktop/mobile via CSS). Manual play() on mount and onCanPlay bypasses mobile autoplay issues.
  */
 const HeroVideo = memo(function HeroVideo({
   isMobile,
@@ -50,26 +45,54 @@ const HeroVideo = memo(function HeroVideo({
   videoReady: boolean;
   onCanPlay: () => void;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
   const desktopPosterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const videos = container.querySelectorAll("video");
-    const handler = () => onCanPlay();
-    videos.forEach((v) => v.addEventListener("canplay", handler));
-    return () => videos.forEach((v) => v.removeEventListener("canplay", handler));
-  }, [onCanPlay]);
+    desktopVideoRef.current?.play().catch(() => {});
+    mobileVideoRef.current?.play().catch(() => {});
+  }, []);
+
+  const handleCanPlay = useCallback(
+    (ref: React.RefObject<HTMLVideoElement | null>) => {
+      ref.current?.play().catch(() => {});
+      onCanPlay();
+    },
+    [onCanPlay]
+  );
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className="absolute inset-0 h-full overflow-hidden z-[-1]"
-        dangerouslySetInnerHTML={{ __html: HERO_VIDEO_HTML }}
-        suppressHydrationWarning
-      />
+      <div className="absolute inset-0 h-full overflow-hidden z-[-1]">
+        <video
+          key="hero-video-desktop"
+          ref={desktopVideoRef}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          poster={HERO_POSTER_DESKTOP}
+          src={HERO_VIDEO_DESKTOP}
+          className="absolute inset-0 object-cover w-full h-full pointer-events-none hidden lg:block"
+          onCanPlay={() => handleCanPlay(desktopVideoRef)}
+          aria-hidden
+        />
+        <video
+          key="hero-video-mobile"
+          ref={mobileVideoRef}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          src={HERO_VIDEO_MOBILE}
+          className="absolute inset-0 object-cover w-full h-full pointer-events-none block lg:hidden"
+          onCanPlay={() => handleCanPlay(mobileVideoRef)}
+          aria-hidden
+        />
+      </div>
       <div className="absolute inset-0 z-[1] overflow-hidden">
         <motion.div
           className="absolute inset-0"
