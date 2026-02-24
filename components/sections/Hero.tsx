@@ -156,6 +156,7 @@ function HeroInner({ locale }: HeroProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
+  const guestsStepperRef = useRef<HTMLDivElement>(null);
   const copy = localized[locale];
   const closeCalendar = useCallback(() => setShowCalendar(false), []);
   const onCanPlay = useCallback(() => setVideoReady(true), []);
@@ -244,12 +245,12 @@ function HeroInner({ locale }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.44, ease: "easeOut" }}
           onSubmit={onSubmit}
-          className="relative mt-12 grid grid-cols-2 gap-2 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:gap-4 sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
+          className="relative mt-12 flex flex-col gap-2 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:flex-row sm:items-stretch sm:gap-3"
         >
-          <div ref={dateDropdownRef} className="relative min-w-0">
+          <div ref={dateDropdownRef} className="relative min-w-0 sm:flex-[1.35]">
             <button
               onClick={() => setShowCalendar((value) => !value)}
-              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-left transition-all duration-300 ease hover:bg-black/[0.02] min-w-0"
+              className="flex h-[60px] w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-4 text-left transition-all duration-300 ease hover:bg-neutral-50 min-w-0"
               type="button"
             >
               <span className="flex min-w-0 shrink-0 items-center gap-2">
@@ -301,23 +302,32 @@ function HeroInner({ locale }: HeroProps) {
             </motion.div>
           </div>
 
-          <div className="flex min-w-0 items-center rounded-sm border border-black/15 bg-white transition-all duration-300 ease hover:bg-black/[0.02]">
-            <span className="flex shrink-0 items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A]">
+          <div className="flex h-[60px] min-w-0 cursor-pointer items-center rounded-sm border border-black/15 bg-white transition-all duration-300 ease hover:bg-neutral-50 sm:flex-1">
+            <button
+              type="button"
+              onClick={() => guestsStepperRef.current?.focus()}
+              className="flex shrink-0 items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A] focus:outline-none"
+            >
               <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
               <span className="hidden truncate sm:inline">{copy.searchGuests}</span>
-            </span>
-            <div className="flex flex-1 items-center justify-center gap-1 py-2 pr-2 sm:gap-2 sm:py-3 sm:pr-3" aria-label={copy.searchGuests}>
+            </button>
+            <div
+              ref={guestsStepperRef}
+              tabIndex={-1}
+              className="flex flex-1 items-center justify-center gap-2 pr-2 sm:gap-3 sm:pr-3"
+              aria-label={copy.searchGuests}
+            >
               <motion.button
                 type="button"
                 onClick={() => setGuests((n) => Math.max(GUESTS_MIN, n - 1))}
                 disabled={guests <= GUESTS_MIN}
                 whileTap={{ scale: 0.92 }}
-                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] sm:h-9 sm:w-9"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059]"
                 aria-label="-"
               >
                 <Minus className="h-4 w-4" />
               </motion.button>
-              <span className="min-w-[1.5rem] text-center text-sm font-medium text-[#1A1A1B] tracking-[0.02em] sm:min-w-[2rem] sm:text-base">
+              <span className="min-w-[1.75rem] text-center text-sm font-medium text-[#1A1A1B] tracking-[0.02em] sm:min-w-[2.25rem] sm:text-base">
                 {guests}
               </span>
               <motion.button
@@ -325,7 +335,7 @@ function HeroInner({ locale }: HeroProps) {
                 onClick={() => setGuests((n) => Math.min(GUESTS_MAX, n + 1))}
                 disabled={guests >= GUESTS_MAX}
                 whileTap={{ scale: 0.92 }}
-                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059] sm:h-9 sm:w-9"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-sm text-[#1A1A1B] outline-none transition-opacity disabled:cursor-not-allowed disabled:opacity-30 hover:bg-black/[0.04] focus-visible:ring-1 focus-visible:ring-[#C5A059]"
                 aria-label="+"
               >
                 <Plus className="h-4 w-4" />
@@ -335,7 +345,7 @@ function HeroInner({ locale }: HeroProps) {
 
           <button
             type="submit"
-            className="col-span-2 rounded-sm bg-[#C5A059] px-6 py-3 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 sm:col-span-1"
+            className="mt-2 flex h-[60px] w-full items-center justify-center rounded-sm bg-[#C5A059] px-6 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 sm:mt-0 sm:w-auto"
           >
             {copy.searchButton}
           </button>
