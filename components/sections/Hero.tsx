@@ -5,7 +5,6 @@ import { CalendarDays, LoaderCircle, Users } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
-import { HeroVideo } from "@/components/sections/HeroVideo";
 import {
   formatISOToDDMMYYYY,
   getDefaultCheckInCheckOut,
@@ -22,6 +21,8 @@ const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
 const MOBILE_BREAKPOINT = 768;
+const HERO_VIDEO_DESKTOP = "/videos/hero.webm";
+const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
@@ -35,6 +36,7 @@ export function Hero({ locale }: HeroProps) {
   const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
   const copy = localized[locale];
@@ -67,6 +69,44 @@ export function Hero({ locale }: HeroProps) {
     return () => posterMq.removeEventListener("change", updatePoster);
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let fallbackTried = false;
+    const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+    const setSource = () => {
+      fallbackTried = false;
+      const mobile = isMobile();
+      const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
+      video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      video.src = src;
+      video.load();
+      video.play().catch(() => {});
+    };
+
+    const onError = () => {
+      if (fallbackTried) return;
+      fallbackTried = true;
+      video.src = HERO_VIDEO_DESKTOP;
+      video.load();
+      video.play().catch(() => {});
+    };
+
+    video.addEventListener("error", onError);
+    setSource();
+    const onResize = () => setSource();
+    window.addEventListener("resize", onResize);
+    return () => {
+      video.removeEventListener("error", onError);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
 
@@ -90,7 +130,7 @@ export function Hero({ locale }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-[100dvh] overflow-hidden">
+    <section className="relative min-h-screen overflow-hidden">
       <motion.div
         className="absolute inset-0"
         style={reducedMotion ? undefined : { y: parallaxY }}
@@ -117,7 +157,19 @@ export function Hero({ locale }: HeroProps) {
             fetchPriority="high"
           />
         </motion.div>
-        <HeroVideo poster={posterSrc} onCanPlay={onCanPlay} />
+        {/* Local video from /videos; src set in useEffect (mobile vs desktop), then play() */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster={posterSrc}
+          onCanPlay={onCanPlay}
+          className="absolute inset-0 h-full w-full object-cover"
+          aria-hidden
+        />
       </motion.div>
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
