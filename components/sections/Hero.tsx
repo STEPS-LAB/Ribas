@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { CalendarDays, LoaderCircle, Minus, Plus, Users } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, memo, useCallback, useEffect, useRef, useState } from "react";
@@ -30,8 +30,16 @@ const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
-/** Single background: one video (all viewports), poster overlay fades out when video plays. */
-const HeroBackground = memo(function HeroBackground({
+/** Static video HTML: browser-owned, no React lifecycle. Two sources (desktop/mobile) shown via CSS. */
+const HERO_VIDEO_HTML =
+  `<video class="absolute inset-0 h-full w-full object-cover pointer-events-none hidden lg:block" autoplay muted loop playsinline webkit-playsinline="true" preload="auto" style="width:100%;height:100%;object-fit:cover;pointer-events:none" poster="${HERO_POSTER_DESKTOP}" aria-hidden="true"><source src="${HERO_VIDEO_DESKTOP}" type="video/webm"></video>` +
+  `<video class="absolute inset-0 h-full w-full object-cover pointer-events-none block lg:hidden" autoplay muted loop playsinline webkit-playsinline="true" preload="auto" style="width:100%;height:100%;object-fit:cover;pointer-events:none" aria-hidden="true"><source src="${HERO_VIDEO_MOBILE}" type="video/webm"></video>`;
+
+/**
+ * Hero video + poster. Video is injected via dangerouslySetInnerHTML so React never touches it
+ * after mount, avoiding iOS restart issues. Poster overlay fades out when video can play.
+ */
+const HeroVideo = memo(function HeroVideo({
   isMobile,
   reducedMotion,
   videoReady,
@@ -42,72 +50,27 @@ const HeroBackground = memo(function HeroBackground({
   videoReady: boolean;
   onCanPlay: () => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const desktopPosterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    let fallbackTried = false;
-    const applySource = (mobile: boolean) => {
-      fallbackTried = false;
-      video.poster = mobile ? "" : HERO_POSTER_DESKTOP;
-      video.src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
-      video.load();
-      video.play().catch(() => {});
-      const el = desktopPosterRef.current;
-      if (!mobile && el) el.style.backgroundImage = `url(${HERO_POSTER_DESKTOP})`;
-    };
-
-    const onError = () => {
-      if (fallbackTried) return;
-      fallbackTried = true;
-      video.src = HERO_VIDEO_DESKTOP;
-      video.load();
-      video.play().catch(() => {});
-    };
-
-    video.addEventListener("error", onError);
-    applySource(isMobile);
-
-    const onResize = () => {
-      const mobile = window.innerWidth < DESKTOP_BREAKPOINT;
-      applySource(mobile);
-      if (!mobile && desktopPosterRef.current) {
-        desktopPosterRef.current.style.backgroundImage = `url(${HERO_POSTER_DESKTOP})`;
-      }
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      video.removeEventListener("error", onError);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [isMobile]);
-
-  const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
-  const applyParallax = !reducedMotion && !isMobile;
+    const container = containerRef.current;
+    if (!container) return;
+    const videos = container.querySelectorAll("video");
+    const handler = () => onCanPlay();
+    videos.forEach((v) => v.addEventListener("canplay", handler));
+    return () => videos.forEach((v) => v.removeEventListener("canplay", handler));
+  }, [onCanPlay]);
 
   return (
-    <div className="absolute inset-0 z-0">
-      {/* Video in non-transformed container so scroll does not trigger reload (iOS). */}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        onCanPlay={onCanPlay}
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        aria-hidden
+    <>
+      <div
+        ref={containerRef}
+        className="absolute inset-0 h-full overflow-hidden z-[-1]"
+        dangerouslySetInnerHTML={{ __html: HERO_VIDEO_HTML }}
+        suppressHydrationWarning
       />
-      {/* Poster overlay: parallax only here so video layer is never transformed. */}
-      <motion.div
-        className="absolute inset-0 z-[1] overflow-hidden"
-        style={applyParallax ? { y: parallaxY } : undefined}
-      >
+      <div className="absolute inset-0 z-[1] overflow-hidden">
         <motion.div
           className="absolute inset-0"
           initial={false}
@@ -137,11 +100,12 @@ const HeroBackground = memo(function HeroBackground({
             <div
               ref={desktopPosterRef}
               className="hidden lg:block h-full w-full bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${HERO_POSTER_DESKTOP})` }}
             />
           )}
         </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </>
   );
 });
 
@@ -203,15 +167,15 @@ function HeroInner({ locale }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
-      <HeroBackground
+    <section className="relative min-h-[100vh] overflow-hidden">
+      <HeroVideo
         isMobile={isMobile}
         reducedMotion={reducedMotion}
         videoReady={videoReady}
         onCanPlay={onCanPlay}
       />
-      <div className="pointer-events-none absolute inset-0 bg-black/45" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-black/45" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" aria-hidden />
 
       <div className="relative z-40 mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
         <motion.p
