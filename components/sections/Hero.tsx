@@ -2,8 +2,9 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
   formatISOToDDMMYYYY,
   getDefaultCheckInCheckOut,
@@ -36,7 +37,12 @@ export function Hero({ locale }: HeroProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const dateDropdownRef = useRef<HTMLDivElement>(null);
+  const guestsSelectId = useId();
   const copy = localized[locale];
+  const closeCalendar = useCallback(() => setShowCalendar(false), []);
+
+  useOnClickOutside(dateDropdownRef, closeCalendar);
 
   useEffect(() => {
     const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
@@ -202,7 +208,7 @@ export function Hero({ locale }: HeroProps) {
           onSubmit={onSubmit}
           className="relative mt-12 grid gap-3 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
         >
-          <div className="relative">
+          <div ref={dateDropdownRef} className="relative">
             <button
               onClick={() => setShowCalendar((value) => !value)}
               className="flex w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 py-3 text-left text-sm"
@@ -257,13 +263,18 @@ export function Hero({ locale }: HeroProps) {
             </motion.div>
           </div>
 
-          <label className="flex items-center gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-sm">
-            <Users className="h-4 w-4 text-[#4A4A4A]" />
+          <label
+            htmlFor={guestsSelectId}
+            className="flex w-full cursor-pointer items-center gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-sm transition-colors duration-200 hover:bg-black/[0.02]"
+          >
+            <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
             {copy.searchGuests}
             <select
-              className="ml-auto bg-transparent text-sm outline-none"
+              id={guestsSelectId}
+              className="ml-auto min-h-[1.5rem] w-full cursor-pointer bg-transparent text-sm outline-none"
               value={guests}
               onChange={(event) => setGuests(Number(event.target.value))}
+              aria-label={copy.searchGuests}
             >
               {guestOptions.map((value) => (
                 <option key={value} value={value}>

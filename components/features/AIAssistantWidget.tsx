@@ -3,7 +3,7 @@
 import { Locale, localized } from "@/lib/content";
 import { MessageCircle, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const syncTransition = { type: "tween" as const, duration: 0.4, ease: "easeInOut" as const };
 
@@ -15,6 +15,15 @@ type AIAssistantWidgetProps = {
 export function AIAssistantWidget({ locale, visible = true }: AIAssistantWidgetProps) {
   const [open, setOpen] = useState(false);
   const copy = localized[locale];
+
+  useEffect(() => {
+    if (!open) return;
+    const handleEsc = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [open]);
 
   return (
     <motion.div
@@ -49,6 +58,16 @@ export function AIAssistantWidget({ locale, visible = true }: AIAssistantWidgetP
         transition={{ duration: 0.22 }}
         className="fixed left-4 right-4 bottom-40 z-40 mx-auto w-full max-w-[min(92vw,440px)] rounded-sm border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.2)] md:left-auto md:right-8 md:bottom-24 md:w-[440px] md:min-h-[200px]"
       >
+        <motion.button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Close"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute -right-3 -top-3 flex h-8 w-8 min-h-[32px] min-w-[32px] items-center justify-center rounded-full border border-[#C5A059] bg-[#1A1A1B] text-[#C5A059] shadow-md transition-colors duration-200 hover:bg-[#2a2a2b] focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2 focus:ring-offset-white"
+        >
+          <X className="h-4 w-4 shrink-0 stroke-[2]" aria-hidden />
+        </motion.button>
         <p className="text-xs uppercase tracking-[0.16em] text-[#C5A059]">AI Concierge</p>
         <p className="mt-4 text-base leading-[1.65] text-[#1A1A1B]">{copy.chatGreeting}</p>
         <div className="mt-5 rounded-sm border border-black/10 bg-[#F9F9F9] px-4 py-3.5 text-sm leading-relaxed text-[#4A4A4A]">
