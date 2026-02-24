@@ -65,7 +65,7 @@ export function Rooms({ locale }: RoomsProps) {
                 <div className="p-5">
                   <div className="flex items-center justify-between gap-4">
                     <h3 className="text-xl font-semibold text-[#1A1A1B]">{room.title}</h3>
-                    <p className="text-xs uppercase tracking-[0.08em] text-[#C5A059]">
+                    <p className="text-base font-semibold text-[#C5A059] md:text-lg">
                       {room.price}
                     </p>
                   </div>

@@ -66,6 +66,9 @@ type LocalizedContent = {
   bookingModalTitle: string;
   checkIn: string;
   checkOut: string;
+  datePlaceholder: string;
+  dateCheckInLabel: string;
+  dateCheckOutLabel: string;
   guestsLabel: string;
   pickRoomButton: string;
   modalClose: string;
@@ -120,6 +123,9 @@ export const localized: Record<Locale, LocalizedContent> = {
     bookingModalTitle: "Бронювання",
     checkIn: "Заїзд",
     checkOut: "Виїзд",
+    datePlaceholder: "дд.мм.рррр",
+    dateCheckInLabel: "Дата заїзду:",
+    dateCheckOutLabel: "Дата виїзду:",
     guestsLabel: "Гості",
     pickRoomButton: "Підібрати номер",
     modalClose: "Закрити",
@@ -170,6 +176,9 @@ export const localized: Record<Locale, LocalizedContent> = {
     bookingModalTitle: "Booking",
     checkIn: "Check-in",
     checkOut: "Check-out",
+    datePlaceholder: "dd.mm.yyyy",
+    dateCheckInLabel: "Check-in date:",
+    dateCheckOutLabel: "Check-out date:",
     guestsLabel: "Guests",
     pickRoomButton: "Pick a room",
     modalClose: "Close",

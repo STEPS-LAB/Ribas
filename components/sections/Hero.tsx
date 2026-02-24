@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 
 type HeroProps = {
@@ -10,8 +10,18 @@ type HeroProps = {
 };
 
 const guestOptions = [1, 2, 3, 4, 5, 6];
-const startDate = "2026-03-14";
-const endDate = "2026-03-17";
+const defaultCheckIn = "2026-03-14";
+const defaultCheckOut = "2026-03-17";
+
+function formatISOToDDMMYYYY(iso: string): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
@@ -23,7 +33,8 @@ const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
 export function Hero({ locale }: HeroProps) {
-  const [dates, setDates] = useState(`${startDate} - ${endDate}`);
+  const [checkIn, setCheckIn] = useState(defaultCheckIn);
+  const [checkOut, setCheckOut] = useState(defaultCheckOut);
   const [guests, setGuests] = useState(2);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -96,14 +107,11 @@ export function Hero({ locale }: HeroProps) {
 
   const onCanPlay = () => setVideoReady(true);
 
-  const datePresets = useMemo(
-    () => [
-      `${startDate} - ${endDate}`,
-      "2026-04-02 - 2026-04-06",
-      "2026-04-18 - 2026-04-21",
-    ],
-    []
-  );
+  const minCheckIn = todayISO();
+  const minCheckOut = checkIn || minCheckIn;
+  const datesDisplay = checkIn && checkOut
+    ? `${formatISOToDDMMYYYY(checkIn)} — ${formatISOToDDMMYYYY(checkOut)}`
+    : copy.searchDates;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -205,7 +213,7 @@ export function Hero({ locale }: HeroProps) {
                 <CalendarDays className="h-4 w-4 text-[#4A4A4A]" />
                 {copy.searchDates}
               </span>
-              <span className="text-xs text-[#4A4A4A]">{dates}</span>
+              <span className="text-xs text-[#4A4A4A]">{datesDisplay}</span>
             </button>
 
             <motion.div
@@ -216,25 +224,36 @@ export function Hero({ locale }: HeroProps) {
                   : { opacity: 0, y: 0, pointerEvents: "none" }
               }
               transition={{ duration: 0.2 }}
-              className="absolute z-20 mt-2 w-full rounded-sm border border-black/10 bg-white p-3 shadow-xl"
+              className="absolute z-20 mt-2 w-full min-w-[280px] rounded-sm border border-black/10 bg-white p-4 shadow-xl"
             >
-              <p className="mb-2 text-xs uppercase tracking-[0.16em] text-[#4A4A4A]">
+              <p className="mb-3 text-xs uppercase tracking-[0.16em] text-[#4A4A4A]">
                 {copy.calendarLabel}
               </p>
-              <div className="space-y-1">
-                {datePresets.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => {
-                      setDates(preset);
-                      setShowCalendar(false);
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm text-[#4A4A4A]">{copy.dateCheckInLabel}</span>
+                  <input
+                    type="date"
+                    min={minCheckIn}
+                    value={checkIn}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setCheckIn(v);
+                      if (checkOut && v >= checkOut) setCheckOut("");
                     }}
-                    className="w-full rounded-sm px-2 py-2 text-left text-sm transition hover:bg-[#F9F9F9]"
-                  >
-                    {preset}
-                  </button>
-                ))}
+                    className="rounded border border-black/15 bg-white px-2.5 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm text-[#4A4A4A]">{copy.dateCheckOutLabel}</span>
+                  <input
+                    type="date"
+                    min={minCheckOut}
+                    value={checkOut}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    className="rounded border border-black/15 bg-white px-2.5 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                  />
+                </div>
               </div>
             </motion.div>
           </div>
