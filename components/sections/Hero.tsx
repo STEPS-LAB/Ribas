@@ -272,11 +272,11 @@ function HeroInner({ locale }: HeroProps) {
               className="flex h-[60px] w-full cursor-pointer items-center justify-between gap-2 rounded-sm border border-black/15 bg-white px-4 text-left transition-all duration-300 ease hover:bg-neutral-50 min-w-0 [pointer-events:auto]"
               type="button"
             >
-              <span className="flex min-w-0 shrink-0 items-center gap-2">
+              <span className="flex min-w-0 items-center gap-2 overflow-hidden">
                 <CalendarDays className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
                 <span className="truncate text-sm">{copy.searchDates}</span>
               </span>
-              <span className="shrink-0 truncate text-xs text-[#4A4A4A] tracking-[0.02em] max-w-[90px] sm:max-w-none">{datesDisplay}</span>
+              <span className="shrink-0 truncate text-lg font-medium text-[#1A1A1B] tracking-[0.02em] max-w-[110px] sm:max-w-none">{datesDisplay}</span>
             </button>
 
             <motion.div
@@ -343,7 +343,7 @@ function HeroInner({ locale }: HeroProps) {
             <div
               ref={guestsStepperRef}
               tabIndex={-1}
-              className="flex flex-1 items-center justify-center gap-2 pr-2 sm:gap-3 sm:pr-3"
+              className="relative z-10 flex flex-1 items-center justify-end gap-2 pr-2 sm:gap-3 sm:pr-3 [pointer-events:auto]"
               aria-label={copy.searchGuests}
             >
               <motion.button
@@ -356,7 +356,7 @@ function HeroInner({ locale }: HeroProps) {
               >
                 <Minus className="h-4 w-4" />
               </motion.button>
-              <span className="min-w-[1.75rem] text-center text-sm font-medium text-[#1A1A1B] tracking-[0.02em] sm:min-w-[2.25rem] sm:text-base">
+              <span className="min-w-[1.75rem] text-center text-lg font-medium text-[#1A1A1B] tracking-[0.02em] sm:min-w-[2.25rem]">
                 {guests}
               </span>
               <motion.button
