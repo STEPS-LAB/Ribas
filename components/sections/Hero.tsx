@@ -276,27 +276,37 @@ function HeroInner({ locale }: HeroProps) {
               <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-x-4 md:gap-y-3">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-sm text-[#4A4A4A]">{copy.dateCheckInLabel}</span>
-                  <input
-                    type="date"
-                    min={minCheckIn}
-                    value={checkIn}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setCheckIn(v);
-                      if (checkOut && v >= checkOut) setCheckOut("");
-                    }}
-                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
-                  />
+                  <div className="relative">
+                    <input
+                      type="date"
+                      min={minCheckIn}
+                      value={checkIn}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setCheckIn(v);
+                        if (checkOut && v >= checkOut) setCheckOut("");
+                      }}
+                      className="input-date-premium relative min-w-0"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4A4A4A]" aria-hidden>
+                      <CalendarDays className="h-4 w-4" />
+                    </span>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <span className="text-sm text-[#4A4A4A]">{copy.dateCheckOutLabel}</span>
-                  <input
-                    type="date"
-                    min={minCheckOut}
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
-                  />
+                  <div className="relative">
+                    <input
+                      type="date"
+                      min={minCheckOut}
+                      value={checkOut}
+                      onChange={(e) => setCheckOut(e.target.value)}
+                      className="input-date-premium relative min-w-0"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4A4A4A]" aria-hidden>
+                      <CalendarDays className="h-4 w-4" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -309,7 +319,7 @@ function HeroInner({ locale }: HeroProps) {
               className="flex shrink-0 cursor-pointer items-center gap-2 px-3 py-3 text-sm text-[#4A4A4A] focus:outline-none [pointer-events:auto]"
             >
               <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
-              <span className="hidden truncate sm:inline">{copy.searchGuests}</span>
+              <span className="truncate">{copy.searchGuests}:</span>
             </button>
             <div
               ref={guestsStepperRef}

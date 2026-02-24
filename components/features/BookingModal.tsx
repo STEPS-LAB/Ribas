@@ -159,8 +159,11 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                           setCheckIn(e.target.value);
                           if (checkOut && e.target.value >= checkOut) setCheckOut("");
                         }}
-                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`input-date-premium relative min-w-0 ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
+                      <span className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4A4A4A]" aria-hidden>
+                        <CalendarDays className="h-4 w-4" />
+                      </span>
                       {!checkIn && (
                         <span
                           className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#4A4A4A] md:hidden"
@@ -184,8 +187,11 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                         min={minCheckOut}
                         value={checkOut}
                         onChange={(e) => setCheckOut(e.target.value)}
-                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`input-date-premium relative min-w-0 ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
+                      <span className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4A4A4A]" aria-hidden>
+                        <CalendarDays className="h-4 w-4" />
+                      </span>
                       {!checkOut && (
                         <span
                           className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#4A4A4A] md:hidden"
