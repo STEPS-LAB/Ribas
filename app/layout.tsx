@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    images: ["/media/hero-poster.png"],
+    images: ["/images/hero-poster%20desktop.webp"],
   },
 };
 
@@ -34,8 +34,15 @@ export default function RootLayout({
       <head>
         <link
           rel="preload"
-          href="/images/hero-poster.webp"
+          href="/images/hero-poster%20desktop.webp"
           as="image"
+          media="(min-width: 769px)"
+        />
+        <link
+          rel="preload"
+          href="/images/hero-poster%20mobile.webp"
+          as="image"
+          media="(max-width: 768px)"
         />
       </head>
       <body className={`${inter.variable} antialiased`}>

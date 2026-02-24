@@ -5,25 +5,35 @@ import { MotionReveal } from "@/components/ui/MotionReveal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Locale, localized, rooms } from "@/lib/content";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useState } from "react";
 
 type RoomsProps = {
   locale: Locale;
 };
 
-function RoomImageWithSkeleton({ src, alt }: { src: string; alt: string }) {
+function RoomImageWithSkeleton({
+  srcDesktop,
+  srcMobile,
+  alt,
+}: {
+  srcDesktop: string;
+  srcMobile: string;
+  alt: string;
+}) {
   const [loaded, setLoaded] = useState(false);
   return (
     <>
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        loading="lazy"
-        className="object-cover transition duration-700 group-hover:scale-105"
-        onLoad={() => setLoaded(true)}
-      />
+      <picture className="absolute inset-0 block h-full w-full">
+        <source media="(max-width: 768px)" srcSet={srcMobile} />
+        <img
+          src={srcDesktop}
+          alt={alt}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          onLoad={() => setLoaded(true)}
+          sizes="(max-width: 768px) 100vw, 33vw"
+        />
+      </picture>
       {!loaded && (
         <Skeleton className="absolute inset-0 rounded-none" aria-hidden />
       )}
@@ -50,7 +60,7 @@ export function Rooms({ locale }: RoomsProps) {
             <MotionReveal key={room.id} delay={index * 0.12}>
               <article className="group overflow-hidden rounded-sm border border-black/8 bg-white shadow-[0_16px_30px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
                 <MotionImageReveal delay={index * 0.1} className="relative aspect-[4/3] overflow-hidden">
-                  <RoomImageWithSkeleton src={room.image} alt={room.title} />
+                  <RoomImageWithSkeleton srcDesktop={room.image} srcMobile={room.imageMobile} alt={room.title} />
                 </MotionImageReveal>
                 <div className="p-5">
                   <div className="flex items-center justify-between gap-4">

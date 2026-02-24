@@ -16,6 +16,10 @@ const endDate = "2026-03-17";
 const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
+const MOBILE_BREAKPOINT = 768;
+const HERO_VIDEO_DESKTOP = "/videos/hero.webm";
+const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
+
 export function Hero({ locale }: HeroProps) {
   const [dates, setDates] = useState(`${startDate} - ${endDate}`);
   const [guests, setGuests] = useState(2);
@@ -33,6 +37,43 @@ export function Hero({ locale }: HeroProps) {
     const handler = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let fallbackTried = false;
+    const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+    const setSource = () => {
+      fallbackTried = false;
+      const mobile = isMobile();
+      const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      video.src = src;
+      video.load();
+      video.play().catch(() => {});
+    };
+
+    const onError = () => {
+      if (fallbackTried) return;
+      fallbackTried = true;
+      video.src = HERO_VIDEO_DESKTOP;
+      video.load();
+      video.play().catch(() => {});
+    };
+
+    video.addEventListener("error", onError);
+    setSource();
+    const onResize = () => setSource();
+    window.addEventListener("resize", onResize);
+    return () => {
+      video.removeEventListener("error", onError);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   const { scrollY } = useScroll();
@@ -66,12 +107,9 @@ export function Hero({ locale }: HeroProps) {
         className="absolute inset-0"
         style={reducedMotion ? undefined : { y: parallaxY }}
       >
-        {/* Poster: shown immediately for LCP; fades out when video is ready */}
+        {/* Poster: shown immediately for LCP; fades out when video is ready. Responsive: mobile vs desktop. */}
         <motion.div
-          className="absolute inset-0 z-[1] bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url(/images/hero-poster.webp)",
-          }}
+          className="absolute inset-0 z-[1] overflow-hidden"
           initial={false}
           animate={{
             opacity: reducedMotion || !videoReady ? 1 : 0,
@@ -83,8 +121,21 @@ export function Hero({ locale }: HeroProps) {
           }}
           role="img"
           aria-hidden
-        />
-        {/* Local video: no third-party requests, preload=none for fast LCP */}
+        >
+          <picture className="absolute inset-0 block h-full w-full">
+            <source
+              media="(max-width: 768px)"
+              srcSet="/images/hero-poster%20mobile.webp"
+            />
+            <img
+              src="/images/hero-poster%20desktop.webp"
+              alt=""
+              className="h-full w-full object-cover object-center"
+              fetchPriority="high"
+            />
+          </picture>
+        </motion.div>
+        {/* Local video from /videos; src set in useEffect (mobile vs desktop), then play() */}
         <video
           ref={videoRef}
           autoPlay
@@ -92,14 +143,11 @@ export function Hero({ locale }: HeroProps) {
           loop
           playsInline
           preload="none"
-          poster="/images/hero-poster.webp"
+          poster="/images/hero-poster%20desktop.webp"
           onCanPlay={onCanPlay}
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden
-        >
-          <source src="/video/hero-video.webm" type="video/webm" />
-          <source src="/video/hero-video.mp4" type="video/mp4" />
-        </video>
+        />
       </motion.div>
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />

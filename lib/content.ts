@@ -6,6 +6,7 @@ export type Room = {
   price: string;
   details: string;
   image: string;
+  imageMobile: string;
 };
 
 export type Amenity = {
@@ -13,6 +14,7 @@ export type Amenity = {
   title: string;
   description: string;
   image: string;
+  imageMobile: string;
 };
 
 export type WhyItem = {
@@ -175,9 +177,9 @@ export const localized: Record<Locale, LocalizedContent> = {
 };
 
 const roomImages = {
-  standard: "https://ribaskarpaty.com/wp-content/uploads/2020/08/1-1-1.jpg",
-  deluxe: "https://ribaskarpaty.com/wp-content/uploads/2020/08/1-1.jpg",
-  luxe: "https://ribaskarpaty.com/wp-content/uploads/2020/08/1.jpg",
+  standard: { desktop: "/images/standart%20desktop.webp", mobile: "/images/standart%20mobile.webp" },
+  deluxe: { desktop: "/images/deluxe%20desktop.webp", mobile: "/images/deluxe%20mobile.webp" },
+  luxe: { desktop: "/images/luxe%20desktop.webp", mobile: "/images/luxe%20mobile.webp" },
 };
 
 export const rooms: Record<Locale, Room[]> = {
@@ -187,21 +189,24 @@ export const rooms: Record<Locale, Room[]> = {
       title: "Standard",
       price: "6800 UAH / ніч",
       details: "19-24 m², сніданок включено, клімат-контроль, мінібар, Wi-Fi.",
-      image: roomImages.standard,
+      image: roomImages.standard.desktop,
+      imageMobile: roomImages.standard.mobile,
     },
     {
       id: "deluxe",
       title: "Deluxe",
       price: "9500 UAH / ніч",
       details: "25 m², зона відпочинку, преміальна постіль, панорамний комфорт.",
-      image: roomImages.deluxe,
+      image: roomImages.deluxe.desktop,
+      imageMobile: roomImages.deluxe.mobile,
     },
     {
       id: "luxe",
       title: "Luxe",
       price: "11000 UAH / ніч",
       details: "25 m², покращений вид, ексклюзивні зручності.",
-      image: roomImages.luxe,
+      image: roomImages.luxe.desktop,
+      imageMobile: roomImages.luxe.mobile,
     },
   ],
   en: [
@@ -210,29 +215,32 @@ export const rooms: Record<Locale, Room[]> = {
       title: "Standard",
       price: "6800 UAH / night",
       details: "19-24 m2, breakfast included, climate control, minibar, Wi-Fi.",
-      image: roomImages.standard,
+      image: roomImages.standard.desktop,
+      imageMobile: roomImages.standard.mobile,
     },
     {
       id: "deluxe",
       title: "Deluxe",
       price: "9500 UAH / night",
       details: "25 m2, lounge area, premium bedding, panoramic comfort.",
-      image: roomImages.deluxe,
+      image: roomImages.deluxe.desktop,
+      imageMobile: roomImages.deluxe.mobile,
     },
     {
       id: "luxe",
       title: "Luxe",
       price: "11000 UAH / night",
       details: "25 m2, elevated view options, signature luxury amenities.",
-      image: roomImages.luxe,
+      image: roomImages.luxe.desktop,
+      imageMobile: roomImages.luxe.mobile,
     },
   ],
 };
 
 const amenityImages = {
-  restaurant: "https://ribaskarpaty.com/wp-content/uploads/2021/01/img_1310-min.jpg",
-  spa: "https://ribaskarpaty.com/wp-content/uploads/2021/02/spa_018.jpg",
-  pool: "https://ribaskarpaty.com/wp-content/uploads/2021/02/spa_005.jpg",
+  restaurant: { desktop: "/images/resto%20desktop.webp", mobile: "/images/resto%20mobile.webp" },
+  spa: { desktop: "/images/spa%20desktop.webp", mobile: "/images/spa%20mobile.webp" },
+  pool: { desktop: "/images/pool%20desktop.webp", mobile: "/images/pool%20mobile.webp" },
 };
 
 export const amenities: Record<Locale, Amenity[]> = {
@@ -242,21 +250,24 @@ export const amenities: Record<Locale, Amenity[]> = {
       title: "Ресторан",
       description:
         "Сезонна кухня з місцевих продуктів у затишній атмосфері.",
-      image: amenityImages.restaurant,
+      image: amenityImages.restaurant.desktop,
+      imageMobile: amenityImages.restaurant.mobile,
     },
     {
       id: "spa",
       title: "SPA",
       description:
         "Фінська сауна, масаж та зони відновлення для глибокого відпочинку.",
-      image: amenityImages.spa,
+      image: amenityImages.spa.desktop,
+      imageMobile: amenityImages.spa.mobile,
     },
     {
       id: "pool",
       title: "Басейн",
       description:
         "Спокійний, мінімалістичний простір для відпочинку цілий рік.",
-      image: amenityImages.pool,
+      image: amenityImages.pool.desktop,
+      imageMobile: amenityImages.pool.mobile,
     },
   ],
   en: [
@@ -265,21 +276,24 @@ export const amenities: Record<Locale, Amenity[]> = {
       title: "Restaurant",
       description:
         "Seasonal cuisine with local ingredients, curated in an intimate setting.",
-      image: amenityImages.restaurant,
+      image: amenityImages.restaurant.desktop,
+      imageMobile: amenityImages.restaurant.mobile,
     },
     {
       id: "spa",
       title: "SPA",
       description:
         "Finnish sauna, massage rituals, and wellness zones tuned for deep recovery.",
-      image: amenityImages.spa,
+      image: amenityImages.spa.desktop,
+      imageMobile: amenityImages.spa.mobile,
     },
     {
       id: "pool",
       title: "Pool",
       description:
         "A calm, architecturally minimal water space for year-round relaxation.",
-      image: amenityImages.pool,
+      image: amenityImages.pool.desktop,
+      imageMobile: amenityImages.pool.mobile,
     },
   ],
 };

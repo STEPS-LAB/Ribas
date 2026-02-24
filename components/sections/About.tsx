@@ -3,14 +3,13 @@
 import { MotionReveal } from "@/components/ui/MotionReveal";
 import { Locale, localized } from "@/lib/content";
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 type AboutProps = {
   locale: Locale;
 };
 
-const aboutImage =
-  "https://ribaskarpaty.com/wp-content/uploads/2023/09/terrace_ribas_040-1.jpg";
+const ABOUT_IMAGE_DESKTOP = "/images/about%20desktop.webp";
+const ABOUT_IMAGE_MOBILE = "/images/about%20mobile.webp";
 
 export function About({ locale }: AboutProps) {
   const copy = localized[locale];
@@ -35,13 +34,16 @@ export function About({ locale }: AboutProps) {
           viewport={{ once: true, amount: 0.3 }}
           className="relative aspect-[4/5] overflow-hidden rounded-sm border border-black/8"
         >
-          <Image
-            src={aboutImage}
-            alt="Ribas Karpaty panoramic terrace"
-            fill
-            sizes="(max-width: 768px) 100vw, 40vw"
-            className="object-cover"
-          />
+          <picture className="absolute inset-0 block h-full w-full">
+            <source media="(max-width: 768px)" srcSet={ABOUT_IMAGE_MOBILE} />
+            <img
+              src={ABOUT_IMAGE_DESKTOP}
+              alt="Ribas Karpaty panoramic terrace"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 40vw"
+            />
+          </picture>
         </motion.div>
       </div>
     </section>

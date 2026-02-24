@@ -3,7 +3,6 @@
 import { MotionImageReveal } from "@/components/ui/MotionImageReveal";
 import { MotionReveal } from "@/components/ui/MotionReveal";
 import { amenities, Locale, localized } from "@/lib/content";
-import Image from "next/image";
 
 type AmenitiesProps = {
   locale: Locale;
@@ -31,15 +30,16 @@ export function Amenities({ locale }: AmenitiesProps) {
                   delay={index * 0.1}
                   className={`relative overflow-hidden ${index % 2 === 1 ? "md:order-2" : ""}`}
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    width={900}
-                    height={620}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="h-full w-full object-cover"
-                  />
+                  <picture className="block h-full w-full">
+                    <source media="(max-width: 768px)" srcSet={item.imageMobile} />
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      loading="lazy"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="h-full w-full object-cover"
+                    />
+                  </picture>
                 </MotionImageReveal>
                 <div className="flex items-center bg-[#F9F9F9] p-8 md:p-14">
                   <div>
