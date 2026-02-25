@@ -23,6 +23,7 @@ const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 const MOBILE_BREAKPOINT = 768;
 const HERO_VIDEO_DESKTOP = "/video/hero-video.webm";
 const HERO_VIDEO_MOBILE = "/video/hero-video.webm";
+const HERO_VIDEO_MP4 = "/video/hero-video.mp4";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
@@ -86,11 +87,17 @@ export function Hero({ locale }: HeroProps) {
 
     let fallbackTried = false;
     const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
     const setSource = () => {
       fallbackTried = false;
       const mobile = isMobile();
-      const src = mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP;
+      // iOS: use MP4 (Safari); desktop & Android: use WebM
+      const src = isIOS
+        ? HERO_VIDEO_MP4
+        : (mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP);
       video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
       video.pause();
       video.removeAttribute("src");
@@ -103,7 +110,8 @@ export function Hero({ locale }: HeroProps) {
     const onError = () => {
       if (fallbackTried) return;
       fallbackTried = true;
-      video.src = HERO_VIDEO_DESKTOP;
+      // Fallback: try MP4 if WebM failed, or WebM (desktop) if MP4 failed
+      video.src = isIOS ? HERO_VIDEO_DESKTOP : HERO_VIDEO_MP4;
       video.load();
       video.play().catch(() => {});
     };
