@@ -17,11 +17,7 @@ type HeroProps = {
 
 const guestOptions = [1, 2, 3, 4, 5, 6];
 
-const PREVIEW_TRANSITION_DURATION = 0.6;
-const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
-
 const MOBILE_BREAKPOINT = 768;
-const HERO_VIDEO = "/video/hero-video.mp4";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
@@ -32,12 +28,9 @@ export function Hero({ locale }: HeroProps) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
   const [disableParallax, setDisableParallax] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
   const copy = localized[locale];
@@ -59,8 +52,7 @@ export function Hero({ locale }: HeroProps) {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Disable parallax on iOS/mobile so the video container has no scroll-driven transform.
-  // On iPhone, transforming the video's parent on scroll causes Safari to restart the video.
+  // Disable parallax on mobile for simpler scrolling.
   useEffect(() => {
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -80,49 +72,8 @@ export function Hero({ locale }: HeroProps) {
     return () => posterMq.removeEventListener("change", updatePoster);
   }, []);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Start playback when component mounts; onCanPlay will set videoReady and fade poster
-    const play = () => video.play().catch(() => {});
-    play();
-    // Try again when video can play (helps mobile if first play() was before ready)
-    video.addEventListener("canplay", play, { once: true });
-    return () => video.removeEventListener("canplay", play);
-  }, []);
-
-  // On mobile, autoplay may be blocked: first tap on hero starts the video
-  useEffect(() => {
-    const section = sectionRef.current;
-    const video = videoRef.current;
-    if (!section || !video) return;
-
-    const tryPlay = () => {
-      video.play().catch(() => {});
-    };
-
-    const onInteraction = () => {
-      tryPlay();
-      section.removeEventListener("touchstart", onInteraction);
-      section.removeEventListener("click", onInteraction);
-    };
-
-    section.addEventListener("touchstart", onInteraction, { once: true, passive: true });
-    section.addEventListener("click", onInteraction, { once: true });
-    return () => {
-      section.removeEventListener("touchstart", onInteraction);
-      section.removeEventListener("click", onInteraction);
-    };
-  }, []);
-
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
-
-  const onCanPlay = () => {
-    setVideoReady(true);
-    videoRef.current?.play().catch(() => {});
-  };
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
@@ -142,23 +93,14 @@ export function Hero({ locale }: HeroProps) {
   };
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-screen overflow-hidden">
       <motion.div
         className="absolute inset-0 z-0"
         style={reducedMotion || disableParallax ? undefined : { y: parallaxY }}
       >
-        {/* Poster: shown immediately for LCP; fades out when video is ready. */}
-        <motion.div
+        {/* Hero background image (responsive: mobile vs desktop poster). */}
+        <div
           className="absolute inset-0 z-[1] overflow-hidden"
-          initial={false}
-          animate={{
-            opacity: reducedMotion || !videoReady ? 1 : 0,
-            pointerEvents: videoReady ? "none" : "auto",
-          }}
-          transition={{
-            duration: PREVIEW_TRANSITION_DURATION,
-            ease: PREVIEW_EASING,
-          }}
           role="img"
           aria-hidden
         >
@@ -168,21 +110,7 @@ export function Hero({ locale }: HeroProps) {
             className="h-full w-full object-cover object-center"
             fetchPriority="high"
           />
-        </motion.div>
-        {/* Local MP4 from /video; preload so it loads immediately on all devices */}
-        <video
-          ref={videoRef}
-          src={HERO_VIDEO}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster={posterSrc}
-          onCanPlay={onCanPlay}
-          className="absolute inset-0 h-full w-full object-cover"
-          aria-hidden
-        />
+        </div>
       </motion.div>
       <div className="absolute inset-0 z-[2] bg-black/45" />
       <div className="absolute inset-x-0 top-0 z-[2] h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
