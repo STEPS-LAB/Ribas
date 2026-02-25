@@ -1,9 +1,9 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { CalendarDays, LoaderCircle, Users } from "lucide-react";
+import { CalendarDays, LoaderCircle, Minus, Plus, Users } from "lucide-react";
 import { FormEvent, ChangeEvent, useCallback, useEffect, useId, useRef, useState } from "react";
-import { Locale, localized } from "@/lib/content";
+import { Locale, localized, BOOKING_MODAL_MAX_GUESTS } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
   formatISOToDDMMYYYY,
@@ -14,8 +14,6 @@ import {
 type HeroProps = {
   locale: Locale;
 };
-
-const guestOptions = [1, 2, 3, 4, 5, 6];
 
 const MOBILE_BREAKPOINT = 768;
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
@@ -34,7 +32,7 @@ export function Hero({ locale }: HeroProps) {
   const [disableParallax, setDisableParallax] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
-  const guestsSelectId = useId();
+  const guestsGroupId = useId();
   const copy = localized[locale];
   const closeCalendar = useCallback(() => setShowCalendar(false), []);
 
@@ -163,14 +161,14 @@ export function Hero({ locale }: HeroProps) {
           <div ref={dateDropdownRef} className="relative">
             <button
               onClick={() => setShowCalendar((value: boolean) => !value)}
-              className="flex w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 py-3 text-left text-sm"
+              className="flex h-14 w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-left text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
               type="button"
             >
               <span className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-[#4A4A4A]" />
+                <CalendarDays className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
                 {copy.searchDates}
               </span>
-              <span className="text-xs text-[#4A4A4A]">{datesDisplay}</span>
+              <span className="text-base font-medium text-[#4A4A4A]">{datesDisplay}</span>
             </button>
 
             <motion.div
@@ -215,26 +213,39 @@ export function Hero({ locale }: HeroProps) {
             </motion.div>
           </div>
 
-          <label
-            htmlFor={guestsSelectId}
-            className="flex w-full cursor-pointer items-center gap-2 rounded-sm border border-black/15 bg-white px-3 py-3 text-sm transition-colors duration-200 hover:bg-black/[0.02]"
+          <div
+            role="group"
+            aria-labelledby={guestsGroupId}
+            className="flex h-14 w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
           >
-            <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
-            {copy.searchGuests}
-            <select
-              id={guestsSelectId}
-              className="ml-auto min-h-[1.5rem] w-full cursor-pointer bg-transparent text-sm outline-none"
-              value={guests}
-              onChange={(event: ChangeEvent<HTMLSelectElement>) => setGuests(Number(event.target.value))}
-              aria-label={copy.searchGuests}
-            >
-              {guestOptions.map((value: number) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
+            <span id={guestsGroupId} className="flex items-center gap-2">
+              <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
+              {copy.searchGuests}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                disabled={guests <= 1}
+                className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                aria-label={locale === "ua" ? "Зменшити кількість гостей" : "Decrease guests"}
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="min-w-[2rem] text-center text-base font-medium text-[#1A1A1B]" aria-live="polite">
+                {guests}
+              </span>
+              <button
+                type="button"
+                onClick={() => setGuests((g) => Math.min(BOOKING_MODAL_MAX_GUESTS, g + 1))}
+                disabled={guests >= BOOKING_MODAL_MAX_GUESTS}
+                className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                aria-label={locale === "ua" ? "Збільшити кількість гостей" : "Increase guests"}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
 
           <button
             type="submit"
