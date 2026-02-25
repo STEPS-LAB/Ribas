@@ -85,6 +85,11 @@ html {
     padding-bottom: calc(var(--spacing) * 38);
   }
 }
+@media (min-width: 48rem) {
+  .md\:pb-28 {
+    padding-bottom: calc(var(--spacing) * 38);
+  }
+}
 
 /* Booking modal: iOS Safari reset — remove system shadows, fix appearance and zoom */
 .booking-modal input[type="text"],
