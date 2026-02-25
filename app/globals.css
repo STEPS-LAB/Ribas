@@ -82,7 +82,7 @@ html {
 }
 @media (min-width: 768px) {
   .date-picker-dropdown.md\:pb-dropdown {
-    padding-bottom: calc(var(--spacing) * 38);
+    padding-bottom: calc(var(--spacing) * 8);
   }
 }
 @media (min-width: 48rem) {
