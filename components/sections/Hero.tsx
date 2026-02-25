@@ -6,6 +6,7 @@ import { FormEvent, ChangeEvent, useCallback, useEffect, useId, useRef, useState
 import { Locale, localized, BOOKING_MODAL_MAX_GUESTS } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
+  formatISOToDDMM,
   formatISOToDDMMYYYY,
   getDefaultCheckInCheckOut,
   todayISO,
@@ -77,9 +78,15 @@ export function Hero({ locale }: HeroProps) {
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
-  const datesDisplay = checkIn && checkOut
-    ? `${formatISOToDDMMYYYY(checkIn)} — ${formatISOToDDMMYYYY(checkOut)}`
-    : copy.searchDates;
+  const datesPlaceholder = copy.searchDates;
+  const datesDisplayFull =
+    checkIn && checkOut
+      ? `${formatISOToDDMMYYYY(checkIn)} — ${formatISOToDDMMYYYY(checkOut)}`
+      : datesPlaceholder;
+  const datesDisplayShort =
+    checkIn && checkOut
+      ? `${formatISOToDDMM(checkIn)} - ${formatISOToDDMM(checkOut)}`
+      : datesPlaceholder;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -156,19 +163,22 @@ export function Hero({ locale }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
           onSubmit={onSubmit}
-          className="relative mt-12 grid gap-3 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
+          className="relative mt-12 grid gap-3 rounded-sm border border-white/20 bg-white/93 p-4 text-black shadow-[0_18px_50px_rgba(0,0,0,0.24)] [--search-button-height:3rem] sm:grid-cols-[1.3fr_1fr_auto] sm:items-center"
         >
           <div ref={dateDropdownRef} className="relative">
             <button
               onClick={() => setShowCalendar((value: boolean) => !value)}
-              className="flex h-14 w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-left text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
+              className="booking-input flex h-[var(--search-button-height)] w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-left text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
               type="button"
             >
-              <span className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
+              <span className="flex items-center gap-2 text-[#4A4A4A]">
+                <CalendarDays className="h-4 w-4 shrink-0" />
                 {copy.searchDates}
               </span>
-              <span className="text-base font-medium text-[#4A4A4A]">{datesDisplay}</span>
+              <span className="date-range min-w-0 text-right text-[14px] font-medium text-[#1A1A1B] md:text-left">
+                <span className="md:hidden">{datesDisplayShort}</span>
+                <span className="hidden md:inline">{datesDisplayFull}</span>
+              </span>
             </button>
 
             <motion.div
@@ -216,10 +226,10 @@ export function Hero({ locale }: HeroProps) {
           <div
             role="group"
             aria-labelledby={guestsGroupId}
-            className="flex h-14 w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
+            className="booking-input flex h-[var(--search-button-height)] w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 text-sm transition-[border-color,background-color] duration-150 md:hover:border-black/25 md:hover:bg-black/[0.02]"
           >
-            <span id={guestsGroupId} className="flex items-center gap-2">
-              <Users className="h-4 w-4 shrink-0 text-[#4A4A4A]" />
+            <span id={guestsGroupId} className="flex items-center gap-2 text-[#4A4A4A]">
+              <Users className="h-4 w-4 shrink-0" />
               {copy.searchGuests}
             </span>
             <div className="flex items-center gap-1">
@@ -232,7 +242,7 @@ export function Hero({ locale }: HeroProps) {
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="min-w-[2rem] text-center text-base font-medium text-[#1A1A1B]" aria-live="polite">
+              <span className="min-w-[2rem] text-center text-[14px] font-medium text-[#1A1A1B]" aria-live="polite">
                 {guests}
               </span>
               <button
@@ -249,7 +259,7 @@ export function Hero({ locale }: HeroProps) {
 
           <button
             type="submit"
-            className="rounded-sm bg-[#C5A059] px-6 py-3 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
+            className="flex h-[var(--search-button-height)] items-center rounded-sm bg-[#C5A059] px-6 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
           >
             {copy.searchButton}
           </button>

@@ -74,7 +74,7 @@ type LocalizedContent = {
   modalClose: string;
 }
 
-export const BOOKING_MODAL_MAX_GUESTS = 8;
+export const BOOKING_MODAL_MAX_GUESTS = 12;
 
 export const localized: Record<Locale, LocalizedContent> = {
   ua: {
@@ -86,8 +86,8 @@ export const localized: Record<Locale, LocalizedContent> = {
     heroTitle: "RIBAS KARPATY",
     heroSubtitle: "Відпочинок, що не має пауз",
     heroTag: "Premium mountain escape",
-    searchDates: "Дати",
-    searchGuests: "Гості",
+    searchDates: "Дати:",
+    searchGuests: "Гості:",
     searchButton: "Знайти",
     searchAiText: "AI підбирає найкращий номер для вашого відпочинку...",
     searchSuccessMessage: "Підходящий номер знайдено. Перенаправляємо до бронювання...",
@@ -139,8 +139,8 @@ export const localized: Record<Locale, LocalizedContent> = {
     heroTitle: "RIBAS KARPATY",
     heroSubtitle: "A pause-free way to recharge",
     heroTag: "Premium mountain escape",
-    searchDates: "Dates",
-    searchGuests: "Guests",
+    searchDates: "Dates:",
+    searchGuests: "Guests:",
     searchButton: "Find",
     searchAiText: "AI is selecting the best room for your stay...",
     searchSuccessMessage: "Perfect match found. Redirecting to booking demo...",

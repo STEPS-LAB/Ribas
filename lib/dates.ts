@@ -35,6 +35,13 @@ export function formatISOToDDMMYYYY(iso: string): string {
   return `${d}.${m}.${y}`;
 }
 
+/** Format ISO (YYYY-MM-DD) as dd.mm for display (no year). */
+export function formatISOToDDMM(iso: string): string {
+  if (!iso) return "";
+  const [, m, d] = iso.split("-");
+  return `${d}.${m}`;
+}
+
 /** Default range: check-in today, check-out today + 3 days. */
 export function getDefaultCheckInCheckOut(): { checkIn: string; checkOut: string } {
   const checkIn = todayISO();
