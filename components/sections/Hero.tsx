@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, ChangeEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized } from "@/lib/content";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
@@ -21,8 +21,8 @@ const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
 const MOBILE_BREAKPOINT = 768;
-const HERO_VIDEO_DESKTOP = "/videos/hero.webm";
-const HERO_VIDEO_MOBILE = "/videos/hero-mobile.webm";
+const HERO_VIDEO_DESKTOP = "/video/hero-video.webm";
+const HERO_VIDEO_MOBILE = "/video/hero-video.webm";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
@@ -47,8 +47,8 @@ export function Hero({ locale }: HeroProps) {
 
   useEffect(() => {
     const { checkIn: defIn, checkOut: defOut } = getDefaultCheckInCheckOut();
-    setCheckIn((prev) => prev || defIn);
-    setCheckOut((prev) => prev || defOut);
+    setCheckIn((prev: string) => prev || defIn);
+    setCheckOut((prev: string) => prev || defOut);
   }, []);
 
   useEffect(() => {
@@ -221,7 +221,7 @@ export function Hero({ locale }: HeroProps) {
         >
           <div ref={dateDropdownRef} className="relative">
             <button
-              onClick={() => setShowCalendar((value) => !value)}
+              onClick={() => setShowCalendar((value: boolean) => !value)}
               className="flex w-full items-center justify-between rounded-sm border border-black/15 bg-white px-3 py-3 text-left text-sm"
               type="button"
             >
@@ -252,7 +252,7 @@ export function Hero({ locale }: HeroProps) {
                     type="date"
                     min={minCheckIn}
                     value={checkIn}
-                    onChange={(e) => {
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
                       const v = e.target.value;
                       setCheckIn(v);
                       if (checkOut && v >= checkOut) setCheckOut("");
@@ -266,7 +266,7 @@ export function Hero({ locale }: HeroProps) {
                     type="date"
                     min={minCheckOut}
                     value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCheckOut(e.target.value)}
                     className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
@@ -284,10 +284,10 @@ export function Hero({ locale }: HeroProps) {
               id={guestsSelectId}
               className="ml-auto min-h-[1.5rem] w-full cursor-pointer bg-transparent text-sm outline-none"
               value={guests}
-              onChange={(event) => setGuests(Number(event.target.value))}
+              onChange={(event: ChangeEvent<HTMLSelectElement>) => setGuests(Number(event.target.value))}
               aria-label={copy.searchGuests}
             >
-              {guestOptions.map((value) => (
+              {guestOptions.map((value: number) => (
                 <option key={value} value={value}>
                   {value}
                 </option>
