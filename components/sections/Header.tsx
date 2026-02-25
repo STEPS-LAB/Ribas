@@ -152,6 +152,27 @@ export function Header({ locale, onLocaleChange, onBookClick }: HeaderProps) {
               aria-hidden="true"
               onClick={() => setMenuOpen(false)}
             />
+            <motion.button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              className="fixed right-6 top-[max(0.875rem,env(safe-area-inset-top))] z-[62] flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-[#1A1A1B] transition-opacity duration-200 active:opacity-70 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2 md:hidden"
+              aria-label="Close menu"
+              initial={{ opacity: 0, rotate: -90 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              exit={{ opacity: 0, rotate: -90 }}
+              transition={{ duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
+            >
+              <span className="relative flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden>
+                <span
+                  className="absolute h-[1.5px] w-5 rounded-full bg-[#1A1A1B]"
+                  style={{ transform: "rotate(45deg)" }}
+                />
+                <span
+                  className="absolute h-[1.5px] w-5 rounded-full bg-[#1A1A1B]"
+                  style={{ transform: "rotate(-45deg)" }}
+                />
+              </span>
+            </motion.button>
             <motion.aside
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
