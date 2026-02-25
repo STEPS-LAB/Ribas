@@ -21,9 +21,7 @@ const PREVIEW_TRANSITION_DURATION = 0.6;
 const PREVIEW_EASING: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
 const MOBILE_BREAKPOINT = 768;
-const HERO_VIDEO_DESKTOP = "/video/hero-video.webm";
-const HERO_VIDEO_MOBILE = "/video/hero-video.webm";
-const HERO_VIDEO_MP4 = "/video/hero-video.mp4";
+const HERO_VIDEO = "/video/hero-video.mp4";
 const HERO_POSTER_DESKTOP = "/images/hero-poster%20desktop.webp";
 const HERO_POSTER_MOBILE = "/images/hero-poster%20mobile.webp";
 
@@ -85,45 +83,22 @@ export function Hero({ locale }: HeroProps) {
     const video = videoRef.current;
     if (!video) return;
 
-    let fallbackTried = false;
     const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
-    const isIOS =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
     const setSource = () => {
-      fallbackTried = false;
       const mobile = isMobile();
-      // iOS: use MP4 (Safari); desktop & Android: use WebM
-      const src = isIOS
-        ? HERO_VIDEO_MP4
-        : (mobile ? HERO_VIDEO_MOBILE : HERO_VIDEO_DESKTOP);
       video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
       video.pause();
       video.removeAttribute("src");
       video.load();
-      video.src = src;
+      video.src = HERO_VIDEO;
       video.load();
       video.play().catch(() => {});
     };
 
-    const onError = () => {
-      if (fallbackTried) return;
-      fallbackTried = true;
-      // Fallback: try MP4 if WebM failed, or WebM (desktop) if MP4 failed
-      video.src = isIOS ? HERO_VIDEO_DESKTOP : HERO_VIDEO_MP4;
-      video.load();
-      video.play().catch(() => {});
-    };
-
-    video.addEventListener("error", onError);
     setSource();
-    const onResize = () => setSource();
-    window.addEventListener("resize", onResize);
-    return () => {
-      video.removeEventListener("error", onError);
-      window.removeEventListener("resize", onResize);
-    };
+    window.addEventListener("resize", setSource);
+    return () => window.removeEventListener("resize", setSource);
   }, []);
 
   const { scrollY } = useScroll();
@@ -176,7 +151,7 @@ export function Hero({ locale }: HeroProps) {
             fetchPriority="high"
           />
         </motion.div>
-        {/* Local video from /videos; src set in useEffect (mobile vs desktop), then play() */}
+        {/* Local MP4 from /video; src set in useEffect, then play() */}
         <video
           ref={videoRef}
           autoPlay
