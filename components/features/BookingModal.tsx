@@ -2,6 +2,7 @@
 
 import { Locale, localized, BOOKING_MODAL_MAX_GUESTS } from "@/lib/content";
 import { getDefaultCheckInCheckOut, todayISO } from "@/lib/dates";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Minus, Plus, Users, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, FormEvent } from "react";
@@ -12,8 +13,12 @@ type BookingModalProps = {
   locale: Locale;
 };
 
+const ctaTapTransition = { type: "spring" as const, stiffness: 400, damping: 17 };
+
 export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
   const copy = localized[locale];
+  const isMobile = useIsMobile();
+  const ctaTapProps = isMobile ? { whileTap: { scale: 0.95 }, transition: ctaTapTransition } : {};
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
@@ -133,7 +138,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded p-1.5 text-[#4A4A4A] transition hover:opacity-80 hover:bg-black/[0.04] focus:outline-none focus:opacity-80 focus:bg-black/[0.04]"
+                className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-[#4A4A4A] transition hover:opacity-80 hover:bg-black/[0.04] focus:outline-none focus:opacity-80 focus:bg-black/[0.04]"
                 aria-label={copy.modalClose}
               >
                 <X className="h-5 w-5" />
@@ -212,7 +217,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                       type="button"
                       onClick={() => setGuests((g) => Math.max(1, g - 1))}
                       disabled={guests <= 1}
-                      className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
                       aria-label={locale === "ua" ? "Зменшити кількість гостей" : "Decrease guests"}
                     >
                       <Minus className="h-4 w-4" />
@@ -224,7 +229,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                       type="button"
                       onClick={() => setGuests((g) => Math.min(BOOKING_MODAL_MAX_GUESTS, g + 1))}
                       disabled={guests >= BOOKING_MODAL_MAX_GUESTS}
-                      className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
                       aria-label={locale === "ua" ? "Збільшити кількість гостей" : "Increase guests"}
                     >
                       <Plus className="h-4 w-4" />
@@ -233,12 +238,13 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                 </div>
               </div>
 
-              <button
+              <motion.button
                 type="submit"
+                {...ctaTapProps}
                 className="mt-6 w-full rounded-sm bg-[#C5A059] px-4 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#1A1A1B] shadow-md transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
               >
                 {copy.pickRoomButton}
-              </button>
+              </motion.button>
             </form>
           </motion.div>
         </motion.div>

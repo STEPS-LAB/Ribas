@@ -143,7 +143,7 @@ export function Hero({ locale }: HeroProps) {
       <div className="absolute inset-0 z-[3] bg-black/45" />
       <div className="absolute inset-x-0 top-0 z-[3] h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
+      <div className="relative z-[30] mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
         <motion.p
           initial={{ opacity: 1, y: 0 }}
           className="mb-5 text-xs uppercase tracking-[0.22em] text-[#C5A059]"
@@ -195,14 +195,14 @@ export function Hero({ locale }: HeroProps) {
                   : { opacity: 0, y: 0, pointerEvents: "none" }
               }
               transition={{ duration: 0.2 }}
-              className="date-picker-dropdown absolute left-0 right-0 z-[100] mt-2 max-w-full overflow-hidden rounded-sm border border-black/10 bg-white p-4 shadow-xl max-md:top-[calc(100%+10px)] max-md:mt-0 max-md:border-t-0 max-md:shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:left-auto md:right-auto md:min-w-[280px]"
+              className="date-picker-dropdown md:pb-dropdown absolute left-0 right-0 z-[100] mt-2 mb-4 max-h-[80vh] max-w-full overflow-y-auto overflow-x-hidden rounded-sm border border-black/10 bg-white p-4 shadow-xl max-md:top-[calc(100%+10px)] max-md:mt-0 max-md:border-t-0 max-md:shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:left-auto md:right-auto md:min-w-[280px]"
               style={{ transform: "translateZ(0)" }}
             >
               <p className="mb-3 text-xs uppercase tracking-[0.16em] text-[#4A4A4A]">
                 {copy.calendarLabel}
               </p>
-              <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-x-4 md:gap-y-3">
-                <div className="flex flex-col gap-1.5">
+              <div className="flex min-w-0 flex-col gap-4 md:grid md:grid-cols-2 md:gap-x-4 md:gap-y-3">
+                <div className="flex min-w-0 flex-col gap-1.5">
                   <span className="text-sm text-[#4A4A4A]">{copy.dateCheckInLabel}</span>
                   <input
                     type="date"
@@ -216,7 +216,7 @@ export function Hero({ locale }: HeroProps) {
                     className="date-input-ios box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-base text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex min-w-0 flex-col gap-1.5">
                   <span className="text-sm text-[#4A4A4A]">{copy.dateCheckOutLabel}</span>
                   <input
                     type="date"
@@ -244,7 +244,7 @@ export function Hero({ locale }: HeroProps) {
                 type="button"
                 onClick={() => setGuests((g) => Math.max(1, g - 1))}
                 disabled={guests <= 1}
-                className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                className="touch-target flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
                 aria-label={locale === "ua" ? "Зменшити кількість гостей" : "Decrease guests"}
               >
                 <Minus className="h-4 w-4" />
@@ -256,7 +256,7 @@ export function Hero({ locale }: HeroProps) {
                 type="button"
                 onClick={() => setGuests((g) => Math.min(BOOKING_MODAL_MAX_GUESTS, g + 1))}
                 disabled={guests >= BOOKING_MODAL_MAX_GUESTS}
-                className="rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
+                className="touch-target flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-[#4A4A4A] transition hover:bg-black/5 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2"
                 aria-label={locale === "ua" ? "Збільшити кількість гостей" : "Increase guests"}
               >
                 <Plus className="h-4 w-4" />

@@ -6,6 +6,7 @@
   --foreground: #1a1a1b;
   --slate: #4a4a4a;
   --gold: #c5a059;
+  --spacing: 0.25rem;
 }
 
 @theme inline {
@@ -56,10 +57,32 @@ html {
 /* Date inputs: 16px on mobile prevents iOS zoom and keeps display consistent with Android */
 .date-input-ios {
   font-size: 16px !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 @media (min-width: 768px) {
   .date-input-ios {
     font-size: 0.875rem;
+  }
+}
+
+/* Hero date picker dropdown: constrain inputs inside white panel (iOS Safari overflow fix) */
+.date-picker-dropdown input[type="date"],
+.date-picker-dropdown .date-input-ios {
+  box-sizing: border-box !important;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+@media (min-width: 768px) {
+  .date-picker-dropdown.md\:pb-dropdown {
+    padding-bottom: calc(var(--spacing) * 38);
   }
 }
 

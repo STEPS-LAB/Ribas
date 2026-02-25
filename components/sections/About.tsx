@@ -15,7 +15,7 @@ export function About({ locale }: AboutProps) {
   const copy = localized[locale];
 
   return (
-    <section id="about" className="bg-white py-28 md:py-36" aria-labelledby="about-heading">
+    <section id="about" className="relative z-[10] bg-white py-28 md:py-36" aria-labelledby="about-heading">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-[1.1fr_1fr] md:items-center md:gap-14 md:px-10">
         <MotionReveal className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.2em] text-[#C5A059]">{copy.aboutLabel}</p>
