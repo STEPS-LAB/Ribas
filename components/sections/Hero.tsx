@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { CalendarDays, LoaderCircle, Minus, Plus, Users } from "lucide-react";
 import { FormEvent, ChangeEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Locale, localized, BOOKING_MODAL_MAX_GUESTS } from "@/lib/content";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import {
   formatISOToDDMM,
@@ -35,7 +36,12 @@ export function Hero({ locale }: HeroProps) {
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsGroupId = useId();
   const copy = localized[locale];
+  const isMobile = useIsMobile();
   const closeCalendar = useCallback(() => setShowCalendar(false), []);
+
+  const ctaTapProps = isMobile
+    ? { whileTap: { scale: 0.95 }, transition: { type: "spring" as const, stiffness: 400, damping: 17 } }
+    : {};
 
   useOnClickOutside(dateDropdownRef, closeCalendar);
 
@@ -189,7 +195,8 @@ export function Hero({ locale }: HeroProps) {
                   : { opacity: 0, y: 0, pointerEvents: "none" }
               }
               transition={{ duration: 0.2 }}
-              className="date-picker-dropdown absolute left-0 right-0 z-20 mt-2 max-w-full overflow-hidden rounded-sm border border-black/10 bg-white p-4 shadow-xl max-md:top-[calc(100%+6px)] max-md:mt-0 max-md:border-t-0 max-md:shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:left-auto md:right-auto md:min-w-[280px]"
+              className="date-picker-dropdown absolute left-0 right-0 z-[100] mt-2 max-w-full overflow-hidden rounded-sm border border-black/10 bg-white p-4 shadow-xl max-md:top-[calc(100%+10px)] max-md:mt-0 max-md:border-t-0 max-md:shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:left-auto md:right-auto md:min-w-[280px]"
+              style={{ transform: "translateZ(0)" }}
             >
               <p className="mb-3 text-xs uppercase tracking-[0.16em] text-[#4A4A4A]">
                 {copy.calendarLabel}
@@ -206,7 +213,7 @@ export function Hero({ locale }: HeroProps) {
                       setCheckIn(v);
                       if (checkOut && v >= checkOut) setCheckOut("");
                     }}
-                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                    className="date-input-ios box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-base text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -216,7 +223,7 @@ export function Hero({ locale }: HeroProps) {
                     min={minCheckOut}
                     value={checkOut}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setCheckOut(e.target.value)}
-                    className="box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-sm text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
+                    className="date-input-ios box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2 text-base text-[#1A1A1B] outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                   />
                 </div>
               </div>
@@ -257,12 +264,13 @@ export function Hero({ locale }: HeroProps) {
             </div>
           </div>
 
-          <button
+          <motion.button
             type="submit"
+            {...ctaTapProps}
             className="flex h-[var(--search-button-height)] items-center justify-center rounded-sm bg-[#C5A059] px-6 text-sm font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
           >
             {copy.searchButton}
-          </button>
+          </motion.button>
 
           {(isSearching || searchDone) && (
             <div className="sm:col-span-3">

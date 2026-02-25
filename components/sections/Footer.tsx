@@ -1,12 +1,20 @@
+"use client";
+
 import { Locale, localized } from "@/lib/content";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { motion } from "framer-motion";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 type FooterProps = {
   locale: Locale;
 };
 
+const ctaTapTransition = { type: "spring" as const, stiffness: 400, damping: 17 };
+
 export function Footer({ locale }: FooterProps) {
   const copy = localized[locale];
+  const isMobile = useIsMobile();
+  const ctaTapProps = isMobile ? { whileTap: { scale: 0.95 }, transition: ctaTapTransition } : {};
 
   return (
     <footer
@@ -67,12 +75,13 @@ export function Footer({ locale }: FooterProps) {
                 placeholder={copy.emailPlaceholder}
                 className="w-full rounded-sm border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/45 focus:outline-none"
               />
-              <button
+              <motion.button
                 type="button"
+                {...ctaTapProps}
                 className="rounded-sm bg-[#C5A059] px-4 py-2 text-xs uppercase tracking-[0.14em] text-black"
               >
                 {copy.footerSubscribe}
-              </button>
+              </motion.button>
             </form>
           </div>
         </div>

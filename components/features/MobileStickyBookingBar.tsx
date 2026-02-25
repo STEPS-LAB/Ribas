@@ -1,6 +1,7 @@
 "use client";
 
 import { Locale, localized } from "@/lib/content";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { AnimatePresence, motion } from "framer-motion";
 
 type MobileStickyBookingBarProps = {
@@ -15,12 +16,16 @@ const barTransition = {
   ease: "easeInOut",
 } as const;
 
+const ctaTapTransition = { type: "spring" as const, stiffness: 400, damping: 17 };
+
 export function MobileStickyBookingBar({
   showBar,
   locale,
   onBookClick,
 }: MobileStickyBookingBarProps) {
   const copy = localized[locale];
+  const isMobile = useIsMobile();
+  const ctaTapProps = isMobile ? { whileTap: { scale: 0.95 }, transition: ctaTapTransition } : {};
 
   return (
     <div
@@ -37,14 +42,15 @@ export function MobileStickyBookingBar({
             transition={barTransition}
             className="pointer-events-auto flex min-h-[56px] flex-col items-center justify-center border-t border-black/[0.06] bg-[#FFFFFF] px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]"
           >
-            <button
+            <motion.button
               type="button"
               onClick={onBookClick}
-              className="w-[90%] shrink-0 rounded-[2px] bg-[#C5A059] py-2.5 text-xs font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 active:scale-[0.98] hover:brightness-110"
+              {...ctaTapProps}
+              className="w-[90%] shrink-0 rounded-[2px] bg-[#C5A059] py-2.5 text-xs font-medium uppercase tracking-[0.16em] text-[#1A1A1B] shadow-md transition-all duration-300 hover:brightness-110"
               aria-label={copy.stickyBook}
             >
               {copy.stickyBook}
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -92,7 +92,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
   }, [isOpen]);
 
   const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) onClose();
+    if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) onClose();
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -123,7 +123,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
-            className="relative w-full max-w-md rounded-lg border border-black/10 bg-white shadow-xl"
+            className="booking-modal relative w-full max-w-md rounded-lg border border-black/10 bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-black/10 px-4 py-3 sm:px-5">
@@ -159,7 +159,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                           setCheckIn(e.target.value);
                           if (checkOut && e.target.value >= checkOut) setCheckOut("");
                         }}
-                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`booking-modal-input box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 text-base outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkIn ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
                       {!checkIn && (
                         <span
@@ -184,7 +184,7 @@ export function BookingModal({ isOpen, onClose, locale }: BookingModalProps) {
                         min={minCheckOut}
                         value={checkOut}
                         onChange={(e) => setCheckOut(e.target.value)}
-                        className={`box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
+                        className={`booking-modal-input box-border h-10 w-full min-w-0 rounded border border-black/15 bg-white px-3 py-2.5 text-base outline-none transition focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] ${!checkOut ? "text-transparent md:text-[#1A1A1B]" : "text-[#1A1A1B]"}`}
                       />
                       {!checkOut && (
                         <span

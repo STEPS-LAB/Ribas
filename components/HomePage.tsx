@@ -27,6 +27,11 @@ const MobileStickyBookingBar = dynamic(
   { ssr: true }
 );
 
+const PAGE_TITLES: Record<Locale, string> = {
+  ua: "Ribas Karpaty — Готель в самому серці Карпат",
+  en: "Ribas Karpaty — Hotel in the heart of the Carpathians",
+};
+
 export function HomePage() {
   const [locale, setLocale] = useState<Locale>("ua");
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -37,6 +42,20 @@ export function HomePage() {
 
   useEffect(() => {
     document.documentElement.lang = locale === "ua" ? "uk" : "en";
+  }, [locale]);
+
+  useEffect(() => {
+    const title = PAGE_TITLES[locale];
+    document.title = title;
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+      ogTitle.setAttribute("content", title);
+    } else {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:title");
+      meta.setAttribute("content", title);
+      document.head.appendChild(meta);
+    }
   }, [locale]);
 
   return (

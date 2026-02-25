@@ -155,7 +155,7 @@ export function Header({ locale, onLocaleChange, onBookClick }: HeaderProps) {
             <motion.button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="fixed right-6 top-[max(0.875rem,env(safe-area-inset-top))] z-[62] flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-[#1A1A1B] transition-opacity duration-200 active:opacity-70 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2 md:hidden"
+              className="fixed right-6 top-[max(0.875rem,env(safe-area-inset-top))] z-[62] flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-[#1A1A1B] outline-none transition-opacity duration-200 active:opacity-70 md:hidden"
               aria-label="Close menu"
               initial={{ opacity: 0, rotate: -90 }}
               animate={{ opacity: 1, rotate: 0 }}

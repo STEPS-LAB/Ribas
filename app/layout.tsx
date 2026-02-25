@@ -10,10 +10,13 @@ const inter = Inter({
   adjustFontFallback: true,
 });
 
+const defaultTitle = "Ribas Karpaty — Готель в самому серці Карпат";
+const defaultDescription =
+  "Готель Ribas Karpaty — відпочинок у серці Карпат. Номери, SPA, ресторан та гірська панорама. Забронюйте свій відпочинок.";
+
 export const metadata: Metadata = {
-  title: "Ribas Karpaty - Premium Demo Landing",
-  description:
-    "Ready-to-launch premium landing page concept for Ribas Karpaty by STEPS LAB x Ribas Concept.",
+  title: defaultTitle,
+  description: defaultDescription,
   icons: {
     icon: [
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
@@ -22,6 +25,8 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
+    title: defaultTitle,
+    description: defaultDescription,
     images: ["/images/hero-poster%20desktop.webp"],
   },
 };
@@ -32,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="uk">
       <head>
         <link
           rel="preload"

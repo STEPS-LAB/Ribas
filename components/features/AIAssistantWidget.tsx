@@ -1,6 +1,7 @@
 "use client";
 
 import { Locale, localized } from "@/lib/content";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { MessageCircle, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -12,9 +13,13 @@ type AIAssistantWidgetProps = {
   visible?: boolean;
 };
 
+const ctaTapTransition = { type: "spring" as const, stiffness: 400, damping: 17 };
+
 export function AIAssistantWidget({ locale, visible = true }: AIAssistantWidgetProps) {
   const [open, setOpen] = useState(false);
   const copy = localized[locale];
+  const isMobile = useIsMobile();
+  const ctaTapProps = isMobile ? { whileTap: { scale: 0.95 }, transition: ctaTapTransition } : {};
 
   useEffect(() => {
     if (!open) return;
@@ -39,7 +44,7 @@ export function AIAssistantWidget({ locale, visible = true }: AIAssistantWidgetP
     >
       <motion.button
         whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.98 }}
+        {...ctaTapProps}
         onClick={() => setOpen((value) => !value)}
         type="button"
         className="inline-flex items-center gap-2 rounded-sm border border-[#C5A059]/50 bg-[#1A1A1B] px-4 py-3 text-xs uppercase tracking-[0.12em] text-white shadow-xl [&_svg]:transition [&_svg]:hover:opacity-80 [&_svg]:focus:opacity-80"
