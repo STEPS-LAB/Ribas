@@ -37,6 +37,7 @@ export function Hero({ locale }: HeroProps) {
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
   const [disableParallax, setDisableParallax] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
   const copy = localized[locale];
@@ -83,28 +84,45 @@ export function Hero({ locale }: HeroProps) {
     const video = videoRef.current;
     if (!video) return;
 
-    const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+    // Start playback when component mounts; onCanPlay will set videoReady and fade poster
+    const play = () => video.play().catch(() => {});
+    play();
+    // Try again when video can play (helps mobile if first play() was before ready)
+    video.addEventListener("canplay", play, { once: true });
+    return () => video.removeEventListener("canplay", play);
+  }, []);
 
-    const setSource = () => {
-      const mobile = isMobile();
-      video.poster = mobile ? HERO_POSTER_MOBILE : HERO_POSTER_DESKTOP;
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-      video.src = HERO_VIDEO;
-      video.load();
+  // On mobile, autoplay may be blocked: first tap on hero starts the video
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+
+    const tryPlay = () => {
       video.play().catch(() => {});
     };
 
-    setSource();
-    window.addEventListener("resize", setSource);
-    return () => window.removeEventListener("resize", setSource);
+    const onInteraction = () => {
+      tryPlay();
+      section.removeEventListener("touchstart", onInteraction);
+      section.removeEventListener("click", onInteraction);
+    };
+
+    section.addEventListener("touchstart", onInteraction, { once: true, passive: true });
+    section.addEventListener("click", onInteraction, { once: true });
+    return () => {
+      section.removeEventListener("touchstart", onInteraction);
+      section.removeEventListener("click", onInteraction);
+    };
   }, []);
 
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 600], [0, 90]);
 
-  const onCanPlay = () => setVideoReady(true);
+  const onCanPlay = () => {
+    setVideoReady(true);
+    videoRef.current?.play().catch(() => {});
+  };
 
   const minCheckIn = todayISO();
   const minCheckOut = checkIn || minCheckIn;
@@ -124,12 +142,12 @@ export function Hero({ locale }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen overflow-hidden">
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 z-0"
         style={reducedMotion || disableParallax ? undefined : { y: parallaxY }}
       >
-        {/* Poster: shown immediately for LCP; fades out when video is ready. Responsive: mobile vs desktop. */}
+        {/* Poster: shown immediately for LCP; fades out when video is ready. */}
         <motion.div
           className="absolute inset-0 z-[1] overflow-hidden"
           initial={false}
@@ -151,44 +169,39 @@ export function Hero({ locale }: HeroProps) {
             fetchPriority="high"
           />
         </motion.div>
-        {/* Local MP4 from /video; src set in useEffect, then play() */}
+        {/* Local MP4 from /video; preload so it loads immediately on all devices */}
         <video
           ref={videoRef}
+          src={HERO_VIDEO}
           autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="auto"
           poster={posterSrc}
           onCanPlay={onCanPlay}
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden
         />
       </motion.div>
-      <div className="absolute inset-0 bg-black/45" />
-      <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
+      <div className="absolute inset-0 z-[2] bg-black/45" />
+      <div className="absolute inset-x-0 top-0 z-[2] h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
         <motion.p
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
+          initial={{ opacity: 1, y: 0 }}
           className="mb-5 text-xs uppercase tracking-[0.22em] text-[#C5A059]"
         >
           {copy.heroTag}
         </motion.p>
         <motion.h1
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 0.61, 0.36, 1] }}
+          initial={{ opacity: 1, y: 0 }}
           className="max-w-3xl text-4xl font-semibold tracking-[0.08em] text-white sm:text-6xl md:text-7xl"
         >
           {copy.heroTitle}
         </motion.h1>
         <motion.p
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.16, ease: [0.22, 0.61, 0.36, 1] }}
+          initial={{ opacity: 1, y: 0 }}
           className="mt-5 max-w-xl text-base font-light text-white/90 sm:text-xl"
         >
           {copy.heroSubtitle}
@@ -196,7 +209,7 @@ export function Hero({ locale }: HeroProps) {
 
         <motion.form
           id="booking"
-          initial={{ opacity: 0, y: 36 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
           onSubmit={onSubmit}
