@@ -30,7 +30,9 @@ export function Hero({ locale }: HeroProps) {
   const [searchDone, setSearchDone] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+  const [videoReady, setVideoReady] = useState(false);
   const [disableParallax, setDisableParallax] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
   const copy = localized[locale];
@@ -98,9 +100,24 @@ export function Hero({ locale }: HeroProps) {
         className="absolute inset-0 z-0"
         style={reducedMotion || disableParallax ? undefined : { y: parallaxY }}
       >
-        {/* Hero background image (responsive: mobile vs desktop poster). */}
-        <div
-          className="absolute inset-0 z-[1] overflow-hidden"
+        {/* Hero background: video with poster that fades out when video is ready. */}
+        <video
+          ref={videoRef}
+          src="/video/hero-video.mp4"
+          poster={posterSrc}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 z-[1] h-full w-full object-cover object-center"
+          onPlaying={() => setVideoReady(true)}
+          aria-hidden
+        />
+        <motion.div
+          className="absolute inset-0 z-[2] overflow-hidden pointer-events-none"
+          initial={false}
+          animate={{ opacity: videoReady ? 0 : 1 }}
+          transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
           role="img"
           aria-hidden
         >
@@ -110,10 +127,10 @@ export function Hero({ locale }: HeroProps) {
             className="h-full w-full object-cover object-center"
             fetchPriority="high"
           />
-        </div>
+        </motion.div>
       </motion.div>
-      <div className="absolute inset-0 z-[2] bg-black/45" />
-      <div className="absolute inset-x-0 top-0 z-[2] h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
+      <div className="absolute inset-0 z-[3] bg-black/45" />
+      <div className="absolute inset-x-0 top-0 z-[3] h-60 bg-gradient-to-b from-black/55 via-black/20 to-transparent" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col justify-end px-6 pb-24 pt-36 sm:px-8 md:px-12 md:pb-28 md:pt-40">
         <motion.p
