@@ -117,7 +117,7 @@ export function Hero({ locale }: HeroProps) {
           className="absolute inset-0 z-[2] overflow-hidden pointer-events-none"
           initial={false}
           animate={{ opacity: videoReady ? 0 : 1 }}
-          transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
+          transition={{ duration: 1, ease: [0.22, 0.61, 0.36, 1] }}
           role="img"
           aria-hidden
         >
