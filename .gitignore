@@ -7,6 +7,9 @@ node_modules/
 .next/
 out/
 
+# Generated / build HTML (static export outputs to out/; no .html sources in project)
+*.html
+
 # Build
 build/
 dist/

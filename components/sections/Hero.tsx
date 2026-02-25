@@ -36,6 +36,7 @@ export function Hero({ locale }: HeroProps) {
   const [videoReady, setVideoReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string>(HERO_POSTER_MOBILE);
+  const [disableParallax, setDisableParallax] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
   const guestsSelectId = useId();
@@ -56,6 +57,16 @@ export function Hero({ locale }: HeroProps) {
     const handler = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Disable parallax on iOS/mobile so the video container has no scroll-driven transform.
+  // On iPhone, transforming the video's parent on scroll causes Safari to restart the video.
+  useEffect(() => {
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isSmallScreen = window.innerWidth <= MOBILE_BREAKPOINT;
+    setDisableParallax(isIOS || isSmallScreen);
   }, []);
 
   useEffect(() => {
@@ -133,7 +144,7 @@ export function Hero({ locale }: HeroProps) {
     <section className="relative min-h-screen overflow-hidden">
       <motion.div
         className="absolute inset-0"
-        style={reducedMotion ? undefined : { y: parallaxY }}
+        style={reducedMotion || disableParallax ? undefined : { y: parallaxY }}
       >
         {/* Poster: shown immediately for LCP; fades out when video is ready. Responsive: mobile vs desktop. */}
         <motion.div
